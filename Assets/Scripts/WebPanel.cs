@@ -13,17 +13,13 @@ public class WebPanel : MonoBehaviour
     public int iframeWidth = 1920;
     public int iframeHeight = 1080;
 
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
-    private static extern void CreateIframe(string url,
-        float posX, float posY, float posZ,
-        float rotX, float rotY, float rotZ, float rotW,
-        int width, int height, int panelId);
+    private static extern void CreateIframe(string url, int panelId, int pixelWidth, int pixelHeight);
 
     [DllImport("__Internal")]
-    private static extern void SyncIframeTransform(int panelId,
-        float posX, float posY, float posZ,
-        float rotX, float rotY, float rotZ, float rotW);
+    private static extern void UpdateIframeRect(int panelId, float left, float top, float width, float height, bool visible);
 
     [DllImport("__Internal")]
     private static extern void UpdateIframeURL(int panelId, string url);
@@ -33,40 +29,63 @@ public class WebPanel : MonoBehaviour
 #endif
 
     private bool _created = false;
+    private Camera _cam;
 
     void Start()
     {
-        CreatePanel();
+        _cam = Camera.main;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        CreateIframe(siteURL, panelId, iframeWidth, iframeHeight);
+#endif
+        _created = true;
     }
 
     void LateUpdate()
     {
-        if (!_created) return;
+        if (!_created || _cam == null) return;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-        // Sync iframe position every frame (needed for room rotation)
-        Vector3 pos = transform.position;
-        Quaternion rot = transform.rotation;
-        SyncIframeTransform(panelId, pos.x, pos.y, pos.z,
-            rot.x, rot.y, rot.z, rot.w);
+        // Get the quad's 4 corners in world space and project to screen
+        Vector3 scale = transform.lossyScale;
+        float halfW = scale.x * 0.5f;
+        float halfH = scale.y * 0.5f;
+
+        Vector3 right = transform.right;
+        Vector3 up = transform.up;
+
+        Vector3 topLeft = transform.position - right * halfW + up * halfH;
+        Vector3 topRight = transform.position + right * halfW + up * halfH;
+        Vector3 bottomLeft = transform.position - right * halfW - up * halfH;
+        Vector3 bottomRight = transform.position + right * halfW - up * halfH;
+
+        Vector3 tlScreen = _cam.WorldToScreenPoint(topLeft);
+        Vector3 trScreen = _cam.WorldToScreenPoint(topRight);
+        Vector3 blScreen = _cam.WorldToScreenPoint(bottomLeft);
+        Vector3 brScreen = _cam.WorldToScreenPoint(bottomRight);
+
+        // Check if behind camera
+        if (tlScreen.z < 0 || trScreen.z < 0 || blScreen.z < 0 || brScreen.z < 0)
+        {
+            UpdateIframeRect(panelId, 0, 0, 0, 0, false);
+            return;
+        }
+
+        // Calculate bounding box in screen space
+        float minX = Mathf.Min(tlScreen.x, trScreen.x, blScreen.x, brScreen.x);
+        float maxX = Mathf.Max(tlScreen.x, trScreen.x, blScreen.x, brScreen.x);
+        float minY = Mathf.Min(tlScreen.y, trScreen.y, blScreen.y, brScreen.y);
+        float maxY = Mathf.Max(tlScreen.y, trScreen.y, blScreen.y, brScreen.y);
+
+        // Normalize to 0-1 range (Unity screen coords bottom-left origin)
+        float sw = Screen.width;
+        float sh = Screen.height;
+        float normLeft = minX / sw;
+        float normTop = 1f - (maxY / sh);  // flip Y for CSS top-left origin
+        float normWidth = (maxX - minX) / sw;
+        float normHeight = (maxY - minY) / sh;
+
+        UpdateIframeRect(panelId, normLeft, normTop, normWidth, normHeight, true);
 #endif
-    }
-
-    public void CreatePanel()
-    {
-        if (_created) return;
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-        Vector3 pos = transform.position;
-        Quaternion rot = transform.rotation;
-
-        CreateIframe(siteURL,
-            pos.x, pos.y, pos.z,
-            rot.x, rot.y, rot.z, rot.w,
-            iframeWidth, iframeHeight, panelId);
-#endif
-
-        _created = true;
     }
 
     public void SetURL(string url)

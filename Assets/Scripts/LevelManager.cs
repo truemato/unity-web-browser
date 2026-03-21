@@ -16,32 +16,12 @@ public class LevelManager : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void InitBrowser();
-
-    [DllImport("__Internal")]
-    private static extern void SyncCameraTransform(
-        float px, float py, float pz,
-        float rx, float ry, float rz, float rw);
 #endif
 
     void Start()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         InitBrowser();
-#endif
-    }
-
-    void Update()
-    {
-#if UNITY_WEBGL && !UNITY_EDITOR
-        // Sync camera transform every frame
-        Camera cam = Camera.main;
-        if (cam != null)
-        {
-            Vector3 pos = cam.transform.position;
-            Quaternion rot = cam.transform.rotation;
-            SyncCameraTransform(pos.x, pos.y, pos.z,
-                rot.x, rot.y, rot.z, rot.w);
-        }
 #endif
     }
 
@@ -64,7 +44,6 @@ public class LevelManager : MonoBehaviour
 
         roomManager.RotateToNext();
 
-        // Wait for rotation to finish
         yield return new WaitUntil(() => !roomManager.IsRotating);
 
         _currentPanel = (_currentPanel + 1) % TotalPanels;
