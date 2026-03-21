@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P1</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:sans-serif;position:relative}
+.s{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:#fff;background:#333;border:4px solid #999;box-shadow:2px 2px 6px rgba(0,0,0,.3);text-decoration:none;cursor:default;user-select:none}
+a.s{cursor:pointer}a.s:hover{background:#555}
+.msg{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-size:16px;color:#888}
+#lc{position:fixed;bottom:0;left:0;width:100%;pointer-events:none;z-index:100}
+</style></head><body>
+<svg style="position:absolute;width:0;height:0"><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -8"/></filter></svg>
+<div class="msg">Find the right symbol.</div>
+<a class="s" href="p2.html" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>
+<canvas id="lc"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script>
+sessionStorage.removeItem('m1Cleared');sessionStorage.setItem('m1Start',Date.now());
+var D=45,cv=document.getElementById('lc'),ctx=cv.getContext('2d');
+cv.width=window.innerWidth;cv.height=window.innerHeight;
+var W=cv.width,H=cv.height;
+var Engine=Matter.Engine,Bodies=Matter.Bodies,Composite=Matter.Composite,Runner=Matter.Runner;
+var engine=Engine.create({gravity:{x:0,y:-0.5}});
+var ground=Bodies.rectangle(W/2,-20,W+100,40,{isStatic:true});
+var wallL=Bodies.rectangle(-20,H/2,40,H,{isStatic:true});
+var wallR=Bodies.rectangle(W+20,H/2,40,H,{isStatic:true});
+Composite.add(engine.world,[ground,wallL,wallR]);
+var balls=[];
+function spawnBalls(n){for(var i=0;i<n;i++){var r=8+Math.random()*15;
+var b=Bodies.circle(Math.random()*W,H+50+Math.random()*100,r,{restitution:0.2,friction:0.05});
+balls.push(b);Composite.add(engine.world,[b]);}}
+spawnBalls(40);
+var ceiling=null;
+var runner=Runner.create();Runner.run(runner,engine);
+function tick(){
+var cl=sessionStorage.getItem('m1Cleared'),lv;
+if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
+else{var el=(Date.now()-Number(sessionStorage.getItem('m1Start')))/1000;lv=Math.min(el/D,1);}
+var ceilY=H*(1-lv);
+if(ceiling)Composite.remove(engine.world,ceiling);
+ceiling=Bodies.rectangle(W/2,ceilY,W+100,40,{isStatic:true});
+Composite.add(engine.world,[ceiling]);
+ctx.clearRect(0,0,W,H);ctx.fillStyle='#222';
+for(var i=0;i<balls.length;i++){var b=balls[i];ctx.beginPath();ctx.arc(b.position.x,b.position.y,b.circleRadius,0,Math.PI*2);ctx.fill();}
+ctx.fillRect(0,ceilY+10,W,H);
+requestAnimationFrame(tick);}tick();
+cv.style.filter='url(#goo)';
+</script></body></html>
