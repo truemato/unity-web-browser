@@ -18,10 +18,11 @@ public class MonitorDisplay : MonoBehaviour
     void Awake()
     {
         _renderer = GetComponent<MeshRenderer>();
-        // Create instance so we don't modify shared material
+        // Create an Unlit/Texture material so screenshots display correctly
+        _material = new Material(Shader.Find("Unlit/Texture"));
         if (_renderer != null)
         {
-            _material = _renderer.material;
+            _renderer.material = _material;
         }
     }
 
