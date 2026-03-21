@@ -87,6 +87,10 @@ public class LevelManager : MonoBehaviour
         {
             if (roomManager != null && !roomManager.IsRotating)
             {
+                // Mark current panel as completed (iframe was shown → after texture)
+                if (monitorDisplays != null && _currentPanel < monitorDisplays.Length && monitorDisplays[_currentPanel] != null)
+                    monitorDisplays[_currentPanel].SetCompleted();
+
                 // Before rotating: hide all iframes, show textures
                 DeactivateAllPanels();
                 yield return null; // one frame for iframe to hide
