@@ -15,11 +15,15 @@ public class LevelManager : MonoBehaviour
     public WebPanel[] webPanels;
     public MonitorDisplay[] monitorDisplays;
 
-    [Header("Delay before rotation (seconds)")]
+    [Header("Rotation mode")]
+    [Tooltip("ON: rotate only when puzzle cleared (PAGE_ARRIVED). OFF: auto-rotate on timer.")]
+    public bool requireClearToRotate = true;
+
+    [Header("Delay before rotation after clear (seconds)")]
     public float delayBeforeRotation = 3f;
 
-    [Header("Test mode: auto-rotate every N seconds (0 = off)")]
-    public float autoRotateInterval = 3f;
+    [Header("Auto-rotate interval (only used when requireClearToRotate is OFF, 0 = off)")]
+    public float autoRotateInterval = 0f;
 
     private int _currentPanel = 0;
     private const int TotalPanels = 3;
@@ -36,12 +40,10 @@ public class LevelManager : MonoBehaviour
         InitBrowser();
 #endif
         ActivatePanel(_currentPanel);
-
-        // Zoom in on first panel (fire and forget, doesn't block auto-rotate)
         TryZoomIn(_currentPanel);
 
-        // Auto-rotate starts independently
-        if (autoRotateInterval > 0f)
+        // Auto-rotate only when not requiring clear
+        if (!requireClearToRotate && autoRotateInterval > 0f)
         {
             StartCoroutine(AutoRotateLoop());
         }
@@ -59,9 +61,7 @@ public class LevelManager : MonoBehaviour
     private IEnumerator TryZoomOutAndWait()
     {
         if (cameraZoom != null)
-        {
             yield return cameraZoom.ZoomOut();
-        }
     }
 
     private IEnumerator TryZoomInAndWait(int panelIndex)
@@ -117,26 +117,24 @@ public class LevelManager : MonoBehaviour
                 if (monitorDisplays != null && _currentPanel < monitorDisplays.Length && monitorDisplays[_currentPanel] != null)
                     monitorDisplays[_currentPanel].SetCompleted();
 
-                // 1. Hide iframes, show textures, zoom out
                 DeactivateAllPanels();
                 yield return StartCoroutine(TryZoomOutAndWait());
 
-                // 2. Rotate room
                 roomManager.RotateToNext();
                 yield return new WaitUntil(() => !roomManager.IsRotating);
 
                 _currentPanel = (_currentPanel + 1) % TotalPanels;
 
-                // 3. Zoom in to new monitor
                 yield return StartCoroutine(TryZoomInAndWait(_currentPanel));
-
-                // 4. Show iframe
                 ActivatePanel(_currentPanel);
             }
             yield return new WaitForSeconds(autoRotateInterval);
         }
     }
 
+    /// <summary>
+    /// Called from JavaScript via SendMessage when a puzzle is cleared.
+    /// </summary>
     public void OnPageArrived(string panelIdStr)
     {
         int panelId;
