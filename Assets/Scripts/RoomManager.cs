@@ -4,7 +4,7 @@ using System.Collections;
 public class RoomManager : MonoBehaviour
 {
     [Header("Rotation settings")]
-    public float rotationAngle = -120f;
+    public float rotationAngle = 120f;
     public float rotationDuration = 5f;
 
     private bool _isRotating = false;
