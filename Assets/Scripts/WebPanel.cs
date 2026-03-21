@@ -30,19 +30,42 @@ public class WebPanel : MonoBehaviour
 
     private bool _created = false;
     private Camera _cam;
+    private bool _forceHidden = false;
 
     void Start()
     {
         _cam = Camera.main;
 #if UNITY_WEBGL && !UNITY_EDITOR
         CreateIframe(siteURL, panelId, iframeWidth, iframeHeight);
+        // Start hidden until LevelManager says to show
+        UpdateIframeRect(panelId, 0, 0, 0, 0, false);
+        _forceHidden = true;
 #endif
         _created = true;
     }
 
+    /// <summary>
+    /// Force-hide the iframe (used during rotation).
+    /// </summary>
+    public void ForceHide()
+    {
+        _forceHidden = true;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        if (_created) UpdateIframeRect(panelId, 0, 0, 0, 0, false);
+#endif
+    }
+
+    /// <summary>
+    /// Allow the iframe to be shown (position tracked in LateUpdate).
+    /// </summary>
+    public void ForceShow()
+    {
+        _forceHidden = false;
+    }
+
     void LateUpdate()
     {
-        if (!_created || _cam == null) return;
+        if (!_created || _cam == null || _forceHidden) return;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         // Get the quad's 4 corners in world space and project to screen
