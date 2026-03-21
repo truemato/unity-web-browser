@@ -10,6 +10,9 @@ public class MonitorDisplay : MonoBehaviour
     public Texture2D beforeTexture;  // site appearance before browsing
     public Texture2D afterTexture;   // site appearance after level clear
 
+    [Header("Shader (assign Custom/DoubleSidedUnlit)")]
+    public Shader unlitShader;
+
     private MeshRenderer _renderer;
     private Material _material;
     private bool _completed = false;
@@ -18,8 +21,16 @@ public class MonitorDisplay : MonoBehaviour
     void Awake()
     {
         _renderer = GetComponent<MeshRenderer>();
-        // Create an Unlit/Texture material so screenshots display correctly
-        _material = new Material(Shader.Find("Unlit/Texture"));
+        if (unlitShader != null)
+        {
+            _material = new Material(unlitShader);
+        }
+        else
+        {
+            // Fallback: try to find it by name
+            var s = Shader.Find("Custom/DoubleSidedUnlit");
+            _material = s != null ? new Material(s) : new Material(Shader.Find("Unlit/Texture"));
+        }
         if (_renderer != null)
         {
             _renderer.material = _material;
