@@ -27,6 +27,7 @@ public class LevelManager : MonoBehaviour
 
     private int _currentPanel = 0;
     private const int TotalPanels = 3;
+    private bool _gameStarted = false;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
@@ -38,11 +39,28 @@ public class LevelManager : MonoBehaviour
         Application.runInBackground = true;
 #if UNITY_WEBGL && !UNITY_EDITOR
         InitBrowser();
+        // Wait for Click to Start before activating panels
+#else
+        // In editor, start immediately
+        BeginGame();
 #endif
+    }
+
+    /// <summary>
+    /// Called from JavaScript when the player clicks "Click to Start".
+    /// </summary>
+    public void OnGameStarted(string unused)
+    {
+        if (_gameStarted) return;
+        BeginGame();
+    }
+
+    private void BeginGame()
+    {
+        _gameStarted = true;
         ActivatePanel(_currentPanel);
         TryZoomIn(_currentPanel);
 
-        // Auto-rotate only when not requiring clear
         if (!requireClearToRotate && autoRotateInterval > 0f)
         {
             StartCoroutine(AutoRotateLoop());
