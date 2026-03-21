@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panel 0 - Start</title>
+<title>Panel 0 - Page 2</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:sans-serif;position:relative}
@@ -13,14 +13,18 @@ body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:san
 a.symbol{cursor:pointer}
 a.symbol:hover{filter:brightness(1.2)}
 #liquid{position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.85);
-  pointer-events:none;z-index:100;transition:none}
-.msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:18px;color:#888;text-align:center}
+  pointer-events:none;z-index:100}
 </style>
 </head>
 <body>
-<div class="msg">Find the right symbol.</div>
-<a class="symbol" href="p2.html" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>
+<!-- i: center-left -->
+<div class="symbol" style="top:40%;left:35%">i</div>
+<!-- m: top-right (LINK) -->
+<a class="symbol" href="p3.html" style="top:25%;right:12%">m</a>
+<!-- l: bottom-center-left -->
+<div class="symbol" style="bottom:18%;left:30%">l</div>
+<!-- k: bottom-right -->
+<div class="symbol" style="bottom:12%;right:10%">k</div>
 <div id="liquid"></div>
 <script>
 (function(){

@@ -1,35 +1,74 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Goal - Panel 0</title>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      color: white;
-      font-family: sans-serif;
-    }
-    .container { text-align: center; }
-    h1 { font-size: 3em; }
-    p { font-size: 1.5em; opacity: 0.8; }
-  </style>
-  <script>
-    // Notify Unity that the goal page has been reached
-    window.addEventListener('load', function() {
-      window.parent.postMessage({ type: 'PAGE_ARRIVED', panelId: 0 }, '*');
-    });
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel 0 - Goal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:sans-serif;position:relative}
+.symbol{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:bold;color:#fff;background:#ff00ff;border:4px solid #ccc;
+  box-shadow:2px 2px 6px rgba(0,0,0,0.3);text-decoration:none;cursor:default;user-select:none}
+.num{position:absolute;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:bold;color:#fff;background:#00b4b4;text-decoration:none;cursor:default;user-select:none}
+a.num{cursor:pointer}
+a.num:hover{filter:brightness(1.2)}
+.banner{position:absolute;top:10%;left:50%;transform:translateX(-50%);
+  background:#00b4b4;color:#fff;padding:8px 24px;font-size:22px;font-weight:bold;
+  border-radius:6px;white-space:nowrap}
+#liquid{position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.85);
+  pointer-events:none;z-index:100}
+#clear-msg{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:32px;font-weight:bold;color:#00b4b4;z-index:200;text-align:center}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Goal Reached!</h1>
-    <p>3秒後に次のパネルへ回転します</p>
-  </div>
+<!-- ナツメ banner -->
+<div class="banner">ナツメ</div>
+<!-- 5: center-top (LINK → clear) -->
+<a class="num" href="javascript:void(0)" id="clearBtn" style="top:28%;left:50%;transform:translateX(-50%)">5</a>
+<!-- e: right -->
+<div class="symbol" style="top:55%;right:15%">e</div>
+<div id="liquid"></div>
+<div id="clear-msg">CLEAR!</div>
+<script>
+(function(){
+  if(!sessionStorage.getItem('liquidStart'))
+    sessionStorage.setItem('liquidStart',Date.now());
+  var duration=45;
+  var liquid=document.getElementById('liquid');
+  var cleared=false;
+
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    if(cleared)return;
+    cleared=true;
+    sessionStorage.setItem('liquidCleared',Date.now());
+    document.getElementById('clear-msg').style.display='block';
+    // Notify Unity
+    window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');
+  });
+
+  function tick(){
+    var clearedAt=sessionStorage.getItem('liquidCleared');
+    if(clearedAt){
+      // Water recedes over 3 seconds
+      var ct=(Date.now()-Number(clearedAt))/1000;
+      var lv=Math.max(1-ct/3,0);
+      liquid.style.height=(lv*100)+'%';
+      if(lv<=0){
+        liquid.style.height='0%';
+      }
+    }else{
+      var start=Number(sessionStorage.getItem('liquidStart'));
+      var elapsed=(Date.now()-start)/1000;
+      var level=Math.min(elapsed/duration,1);
+      liquid.style.height=(level*100)+'%';
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
 </body>
 </html>
