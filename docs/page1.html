@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel 1</title>
+<style>
+body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;
+  background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);color:#fff;font-family:sans-serif}
+.container{text-align:center}
+h1{font-size:2.5em;margin-bottom:.3em}
+p{font-size:1.2em;opacity:.8;margin-bottom:1em}
+.btn{display:inline-block;margin:.3em;padding:14px 28px;background:#fff;color:#f5576c;
+  border-radius:8px;font-size:1.1em;border:none;cursor:pointer;font-weight:bold}
+.btn:hover{opacity:.85}
+#counter{font-size:1.5em;margin-top:.8em}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Panel 1</h1>
+  <p>Second monitor</p>
+  <button class="btn" onclick="count++;document.getElementById('counter').textContent='Clicks: '+count">Click Me!</button>
+  <button class="btn" style="background:#4facfe;color:#fff" onclick="document.body.style.background='linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)'">Blue</button>
+  <button class="btn" style="background:#38ef7d;color:#fff" onclick="document.body.style.background='linear-gradient(135deg,#11998e 0%,#38ef7d 100%)'">Green</button>
+  <div id="counter">Clicks: 0</div>
+</div>
+<script>var count=0;</script>
+</body>
+</html>
