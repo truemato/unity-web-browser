@@ -64,7 +64,7 @@ svg.style.cssText='position:absolute;width:0;height:0';
 svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7"/></filter>';
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
-var lastTime=performance.now(),waterBonus=0;
+var lastTime=performance.now(),waterBonus=Number(sessionStorage.getItem('liquidBonus'))||0;
 function tick(now){
   var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
   var cl=sessionStorage.getItem('liquidCleared'),lv;
@@ -75,7 +75,7 @@ function tick(now){
   if(spawnTimer>=spawnInterval&&blobs.length<30){spawnBlob();spawnTimer=0;}
   for(var i=blobs.length-1;i>=0;i--){var b=blobs[i];if(!b.alive)continue;b.vy+=120*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
     if(b.willExplode&&b.y>=b.explodeY){drawSplat(b.x,b.y,b.r*2+rng()*15);b.alive=false;continue;}
-    if(b.y+b.r>=getWaveY(b.x,t,totalLv)){waterBonus+=0.001;b.alive=false;continue;}
+    if(b.y+b.r>=getWaveY(b.x,t,totalLv)){waterBonus+=0.001;sessionStorage.setItem('liquidBonus',waterBonus);b.alive=false;continue;}
     if(b.x<-50||b.x>W+50||b.y>H+50)b.alive=false;}
   if(blobs.length>40)blobs=blobs.filter(function(b){return b.alive;});
   drawWave(t,totalLv);requestAnimationFrame(tick);}
