@@ -68,14 +68,18 @@ svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation=
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
 document.getElementById('clearBtn').addEventListener('click',function(){if(cleared)return;cleared=true;
-sessionStorage.setItem('liquidCleared',Date.now());document.getElementById('cm').style.display='block';
+var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
+var lvNow=Math.min(el/D,1)+waterBonus;lvNow=Math.min(lvNow,1);
+sessionStorage.setItem('liquidCleared',Date.now());
+sessionStorage.setItem('liquidClearedLv',lvNow);
+document.getElementById('cm').style.display='block';
 window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');});
 
 var lastTime=performance.now(),waterBonus=Number(sessionStorage.getItem('liquidBonus'))||0;
 function tick(now){
   var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
   var cl=sessionStorage.getItem('liquidCleared'),lv;
-  if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
+  if(cl){var ct=(Date.now()-Number(cl))/1000;var clLv=Number(sessionStorage.getItem('liquidClearedLv'))||1;lv=Math.max(clLv*(1-ct/3),0);}
   else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
   var totalLv=Math.min(lv+waterBonus,1);
   spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;

@@ -68,7 +68,7 @@ var lastTime=performance.now(),waterBonus=Number(sessionStorage.getItem('liquidB
 function tick(now){
   var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
   var cl=sessionStorage.getItem('liquidCleared'),lv;
-  if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
+  if(cl){var ct=(Date.now()-Number(cl))/1000;var clLv=Number(sessionStorage.getItem('liquidClearedLv'))||1;lv=Math.max(clLv*(1-ct/3),0);}
   else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
   var totalLv=Math.min(lv+waterBonus,1);
   spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;

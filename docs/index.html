@@ -16,7 +16,8 @@ canvas{position:fixed;top:0;left:0;pointer-events:none}
 <canvas id="waveCv"></canvas>
 
 <script>
-sessionStorage.removeItem('liquidCleared');sessionStorage.setItem('liquidStart',Date.now());
+sessionStorage.removeItem('liquidCleared');sessionStorage.removeItem('liquidClearedLv');
+sessionStorage.setItem('liquidStart',Date.now());
 sessionStorage.setItem('liquidSeed',String(Date.now()%100000));
 sessionStorage.setItem('liquidBonus','0');
 
@@ -190,7 +191,7 @@ function tick(now){
 
   // compute liquid level
   var cl=sessionStorage.getItem('liquidCleared'),lv;
-  if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
+  if(cl){var ct=(Date.now()-Number(cl))/1000;var clLv=Number(sessionStorage.getItem('liquidClearedLv'))||1;lv=Math.max(clLv*(1-ct/3),0);}
   else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
 
   // add bonus from absorbed blobs (up to 15% extra)
