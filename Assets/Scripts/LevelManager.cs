@@ -81,26 +81,27 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator AutoRotateLoop()
     {
+        Debug.Log("[LevelManager] AutoRotateLoop started, interval=" + autoRotateInterval);
         yield return new WaitForSeconds(autoRotateInterval);
 
         while (true)
         {
+            Debug.Log("[LevelManager] AutoRotate tick: currentPanel=" + _currentPanel + " isRotating=" + (roomManager != null ? roomManager.IsRotating.ToString() : "null"));
+
             if (roomManager != null && !roomManager.IsRotating)
             {
-                // Mark current panel as completed (iframe was shown → after texture)
                 if (monitorDisplays != null && _currentPanel < monitorDisplays.Length && monitorDisplays[_currentPanel] != null)
                     monitorDisplays[_currentPanel].SetCompleted();
 
-                // Before rotating: hide all iframes, show textures
                 DeactivateAllPanels();
-                yield return null; // one frame for iframe to hide
+                yield return null;
 
+                Debug.Log("[LevelManager] Starting rotation from panel " + _currentPanel);
                 roomManager.RotateToNext();
                 yield return new WaitUntil(() => !roomManager.IsRotating);
 
                 _currentPanel = (_currentPanel + 1) % TotalPanels;
-
-                // After rotation done: show iframe on new current panel
+                Debug.Log("[LevelManager] Rotation done, activating panel " + _currentPanel);
                 ActivatePanel(_currentPanel);
             }
             yield return new WaitForSeconds(autoRotateInterval);

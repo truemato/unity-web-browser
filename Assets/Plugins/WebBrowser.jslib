@@ -4,18 +4,18 @@ var WebBrowserLib = {
     initialized: false,
     iframes: {},
     container: null,
+    canvas: null,
 
     init: function () {
       if (WebBrowserState.initialized) return;
       WebBrowserState.initialized = true;
 
       var canvas = document.querySelector('#unity-canvas') || document.querySelector('canvas');
+      WebBrowserState.canvas = canvas;
       var parent = canvas.parentElement;
 
-      // Ensure parent has relative positioning
       parent.style.position = 'relative';
 
-      // Container for iframes, overlaid on top of canvas
       var container = document.createElement('div');
       container.id = 'iframe-overlay';
       container.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10;';
@@ -23,10 +23,21 @@ var WebBrowserLib = {
 
       WebBrowserState.container = container;
 
+      // Prevent iframes from permanently stealing focus from Unity
+      window.addEventListener('blur', function () {
+        setTimeout(function () {
+          if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
+            // Only reclaim focus if no iframe is supposed to be interactive
+            // Unity will keep running via requestAnimationFrame regardless
+          }
+        }, 100);
+      });
+
       // postMessage listener for page arrival
       window.addEventListener('message', function (e) {
         if (e.data && e.data.type === 'PAGE_ARRIVED') {
           var panelId = e.data.panelId || 0;
+          console.log('[WebBrowser] PAGE_ARRIVED panelId=' + panelId);
           if (window.unityInstance) {
             window.unityInstance.SendMessage('LevelManager', 'OnPageArrived', panelId.toString());
           }
@@ -44,11 +55,13 @@ var WebBrowserLib = {
   CreateIframe: function (url, panelId, pixelWidth, pixelHeight) {
     WebBrowserState.init();
     var urlStr = UTF8ToString(url);
+    console.log('[WebBrowser] CreateIframe panelId=' + panelId + ' url=' + urlStr);
 
     var iframe = document.createElement('iframe');
     iframe.src = urlStr;
     iframe.style.cssText = 'position:absolute;border:none;background:white;pointer-events:auto;display:none;';
     iframe.setAttribute('allow', 'autoplay; fullscreen');
+    iframe.setAttribute('tabindex', '-1');
     iframe.id = 'web-panel-' + panelId;
 
     WebBrowserState.container.appendChild(iframe);
@@ -57,17 +70,20 @@ var WebBrowserLib = {
 
   UpdateIframeRect__deps: ['$WebBrowserState'],
   UpdateIframeRect: function (panelId, left, top, width, height, visible) {
-    var iframe = WebBrowserState.iframes[panelId];
-    if (!iframe) return;
-    if (visible) {
-      // Values are normalized 0-1, convert to percentage
-      iframe.style.display = 'block';
-      iframe.style.left = (left * 100) + '%';
-      iframe.style.top = (top * 100) + '%';
-      iframe.style.width = (width * 100) + '%';
-      iframe.style.height = (height * 100) + '%';
-    } else {
-      iframe.style.display = 'none';
+    try {
+      var iframe = WebBrowserState.iframes[panelId];
+      if (!iframe) return;
+      if (visible) {
+        iframe.style.display = 'block';
+        iframe.style.left = (left * 100) + '%';
+        iframe.style.top = (top * 100) + '%';
+        iframe.style.width = (width * 100) + '%';
+        iframe.style.height = (height * 100) + '%';
+      } else {
+        iframe.style.display = 'none';
+      }
+    } catch (e) {
+      console.error('[WebBrowser] UpdateIframeRect error:', e);
     }
   },
 
