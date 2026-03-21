@@ -34,22 +34,41 @@ public class LevelManager : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
         InitBrowser();
 #endif
-        // Start: show textures on all, then zoom in on panel 0
         ActivatePanel(_currentPanel);
-        StartCoroutine(InitialZoomIn());
-    }
 
-    private IEnumerator InitialZoomIn()
-    {
-        // Zoom into panel 0
-        if (cameraZoom != null && monitorTransforms != null && _currentPanel < monitorTransforms.Length)
-        {
-            yield return cameraZoom.ZoomIn(monitorTransforms[_currentPanel]);
-        }
+        // Zoom in on first panel (fire and forget, doesn't block auto-rotate)
+        TryZoomIn(_currentPanel);
 
+        // Auto-rotate starts independently
         if (autoRotateInterval > 0f)
         {
             StartCoroutine(AutoRotateLoop());
+        }
+    }
+
+    private void TryZoomIn(int panelIndex)
+    {
+        if (cameraZoom != null && monitorTransforms != null
+            && panelIndex < monitorTransforms.Length && monitorTransforms[panelIndex] != null)
+        {
+            cameraZoom.ZoomIn(monitorTransforms[panelIndex]);
+        }
+    }
+
+    private IEnumerator TryZoomOutAndWait()
+    {
+        if (cameraZoom != null)
+        {
+            yield return cameraZoom.ZoomOut();
+        }
+    }
+
+    private IEnumerator TryZoomInAndWait(int panelIndex)
+    {
+        if (cameraZoom != null && monitorTransforms != null
+            && panelIndex < monitorTransforms.Length && monitorTransforms[panelIndex] != null)
+        {
+            yield return cameraZoom.ZoomIn(monitorTransforms[panelIndex]);
         }
     }
 
@@ -91,15 +110,15 @@ public class LevelManager : MonoBehaviour
 
         while (true)
         {
-            if (roomManager != null && !roomManager.IsRotating)
+            if (roomManager != null && !roomManager.IsRotating
+                && (cameraZoom == null || !cameraZoom.IsZooming))
             {
                 if (monitorDisplays != null && _currentPanel < monitorDisplays.Length && monitorDisplays[_currentPanel] != null)
                     monitorDisplays[_currentPanel].SetCompleted();
 
-                // 1. Zoom out
+                // 1. Hide iframes, show textures, zoom out
                 DeactivateAllPanels();
-                if (cameraZoom != null)
-                    yield return cameraZoom.ZoomOut();
+                yield return StartCoroutine(TryZoomOutAndWait());
 
                 // 2. Rotate room
                 roomManager.RotateToNext();
@@ -107,10 +126,10 @@ public class LevelManager : MonoBehaviour
 
                 _currentPanel = (_currentPanel + 1) % TotalPanels;
 
-                // 3. Zoom in to new monitor, then show iframe
-                if (cameraZoom != null && monitorTransforms != null && _currentPanel < monitorTransforms.Length)
-                    yield return cameraZoom.ZoomIn(monitorTransforms[_currentPanel]);
+                // 3. Zoom in to new monitor
+                yield return StartCoroutine(TryZoomInAndWait(_currentPanel));
 
+                // 4. Show iframe
                 ActivatePanel(_currentPanel);
             }
             yield return new WaitForSeconds(autoRotateInterval);
@@ -135,21 +154,14 @@ public class LevelManager : MonoBehaviour
         yield return new WaitForSeconds(delayBeforeRotation);
 
         DeactivateAllPanels();
+        yield return StartCoroutine(TryZoomOutAndWait());
 
-        // Zoom out
-        if (cameraZoom != null)
-            yield return cameraZoom.ZoomOut();
-
-        // Rotate
         roomManager.RotateToNext();
         yield return new WaitUntil(() => !roomManager.IsRotating);
 
         _currentPanel = (_currentPanel + 1) % TotalPanels;
 
-        // Zoom in
-        if (cameraZoom != null && monitorTransforms != null && _currentPanel < monitorTransforms.Length)
-            yield return cameraZoom.ZoomIn(monitorTransforms[_currentPanel]);
-
+        yield return StartCoroutine(TryZoomInAndWait(_currentPanel));
         ActivatePanel(_currentPanel);
     }
 }
