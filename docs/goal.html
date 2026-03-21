@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal - Panel 0</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      font-family: sans-serif;
+    }
+    .container { text-align: center; }
+    h1 { font-size: 3em; }
+    p { font-size: 1.5em; opacity: 0.8; }
+  </style>
+  <script>
+    // Notify Unity that the goal page has been reached
+    window.addEventListener('load', function() {
+      window.parent.postMessage({ type: 'PAGE_ARRIVED', panelId: 0 }, '*');
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Goal Reached!</h1>
+    <p>3秒後に次のパネルへ回転します</p>
+  </div>
+</body>
+</html>
