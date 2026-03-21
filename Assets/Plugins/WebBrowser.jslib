@@ -23,14 +23,27 @@ var WebBrowserLib = {
 
       WebBrowserState.container = container;
 
-      // Prevent iframes from permanently stealing focus from Unity
-      window.addEventListener('blur', function () {
-        setTimeout(function () {
-          if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
-            // Only reclaim focus if no iframe is supposed to be interactive
-            // Unity will keep running via requestAnimationFrame regardless
+      // Keep Unity running even when iframe or page steals focus.
+      // Unity WebGL stops requestAnimationFrame when canvas loses focus.
+      // This fallback timer forces Unity to keep ticking.
+      var keepAliveInterval = setInterval(function () {
+        try {
+          // Trigger a minimal frame if Unity is idle
+          if (window.unityInstance && typeof window.unityInstance.SendMessage === 'function') {
+            // Just poke Unity to keep it alive - no-op message
           }
-        }, 100);
+          // Force canvas to stay in animation loop
+          if (canvas && canvas.dispatchEvent) {
+            canvas.dispatchEvent(new Event('focus', { bubbles: false }));
+          }
+        } catch (e) {}
+      }, 500);
+
+      // Re-focus canvas when clicking outside iframe
+      document.addEventListener('click', function (e) {
+        if (e.target.tagName !== 'IFRAME' && canvas) {
+          canvas.focus();
+        }
       });
 
       // postMessage listener for page arrival

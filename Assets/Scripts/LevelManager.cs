@@ -31,6 +31,7 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
+        Application.runInBackground = true;
 #if UNITY_WEBGL && !UNITY_EDITOR
         InitBrowser();
 #endif
