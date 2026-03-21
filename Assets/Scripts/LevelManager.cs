@@ -6,6 +6,10 @@ public class LevelManager : MonoBehaviour
 {
     [Header("References")]
     public RoomManager roomManager;
+    public CameraZoom cameraZoom;
+
+    [Header("Monitor transforms (assign in order 0, 1, 2)")]
+    public Transform[] monitorTransforms;
 
     [Header("Monitor references (assign in order 0, 1, 2)")]
     public WebPanel[] webPanels;
@@ -30,8 +34,18 @@ public class LevelManager : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
         InitBrowser();
 #endif
-        // Start: show iframe on panel 0, show textures on others
+        // Start: show textures on all, then zoom in on panel 0
         ActivatePanel(_currentPanel);
+        StartCoroutine(InitialZoomIn());
+    }
+
+    private IEnumerator InitialZoomIn()
+    {
+        // Zoom into panel 0
+        if (cameraZoom != null && monitorTransforms != null && _currentPanel < monitorTransforms.Length)
+        {
+            yield return cameraZoom.ZoomIn(monitorTransforms[_currentPanel]);
+        }
 
         if (autoRotateInterval > 0f)
         {
@@ -39,16 +53,12 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Show iframe on the given panel, show textures on all others.
-    /// </summary>
     private void ActivatePanel(int panelIndex)
     {
         for (int i = 0; i < TotalPanels; i++)
         {
             if (i == panelIndex)
             {
-                // Active panel: iframe visible, texture hidden
                 if (webPanels != null && i < webPanels.Length && webPanels[i] != null)
                     webPanels[i].ForceShow();
                 if (monitorDisplays != null && i < monitorDisplays.Length && monitorDisplays[i] != null)
@@ -56,7 +66,6 @@ public class LevelManager : MonoBehaviour
             }
             else
             {
-                // Inactive panels: iframe hidden, texture visible
                 if (webPanels != null && i < webPanels.Length && webPanels[i] != null)
                     webPanels[i].ForceHide();
                 if (monitorDisplays != null && i < monitorDisplays.Length && monitorDisplays[i] != null)
@@ -65,9 +74,6 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Hide all iframes, show all textures (during rotation).
-    /// </summary>
     private void DeactivateAllPanels()
     {
         for (int i = 0; i < TotalPanels; i++)
@@ -81,36 +87,36 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator AutoRotateLoop()
     {
-        Debug.Log("[LevelManager] AutoRotateLoop started, interval=" + autoRotateInterval);
         yield return new WaitForSeconds(autoRotateInterval);
 
         while (true)
         {
-            Debug.Log("[LevelManager] AutoRotate tick: currentPanel=" + _currentPanel + " isRotating=" + (roomManager != null ? roomManager.IsRotating.ToString() : "null"));
-
             if (roomManager != null && !roomManager.IsRotating)
             {
                 if (monitorDisplays != null && _currentPanel < monitorDisplays.Length && monitorDisplays[_currentPanel] != null)
                     monitorDisplays[_currentPanel].SetCompleted();
 
+                // 1. Zoom out
                 DeactivateAllPanels();
-                yield return null;
+                if (cameraZoom != null)
+                    yield return cameraZoom.ZoomOut();
 
-                Debug.Log("[LevelManager] Starting rotation from panel " + _currentPanel);
+                // 2. Rotate room
                 roomManager.RotateToNext();
                 yield return new WaitUntil(() => !roomManager.IsRotating);
 
                 _currentPanel = (_currentPanel + 1) % TotalPanels;
-                Debug.Log("[LevelManager] Rotation done, activating panel " + _currentPanel);
+
+                // 3. Zoom in to new monitor, then show iframe
+                if (cameraZoom != null && monitorTransforms != null && _currentPanel < monitorTransforms.Length)
+                    yield return cameraZoom.ZoomIn(monitorTransforms[_currentPanel]);
+
                 ActivatePanel(_currentPanel);
             }
             yield return new WaitForSeconds(autoRotateInterval);
         }
     }
 
-    /// <summary>
-    /// Called from JavaScript via SendMessage when a page arrival is detected.
-    /// </summary>
     public void OnPageArrived(string panelIdStr)
     {
         int panelId;
@@ -118,7 +124,6 @@ public class LevelManager : MonoBehaviour
         if (panelId != _currentPanel) return;
         if (roomManager == null || roomManager.IsRotating) return;
 
-        // Mark this panel as completed (switches to afterTexture)
         if (monitorDisplays != null && panelId < monitorDisplays.Length && monitorDisplays[panelId] != null)
             monitorDisplays[panelId].SetCompleted();
 
@@ -129,14 +134,22 @@ public class LevelManager : MonoBehaviour
     {
         yield return new WaitForSeconds(delayBeforeRotation);
 
-        // Hide all iframes, show textures
         DeactivateAllPanels();
-        yield return null;
 
+        // Zoom out
+        if (cameraZoom != null)
+            yield return cameraZoom.ZoomOut();
+
+        // Rotate
         roomManager.RotateToNext();
         yield return new WaitUntil(() => !roomManager.IsRotating);
 
         _currentPanel = (_currentPanel + 1) % TotalPanels;
+
+        // Zoom in
+        if (cameraZoom != null && monitorTransforms != null && _currentPanel < monitorTransforms.Length)
+            yield return cameraZoom.ZoomIn(monitorTransforms[_currentPanel]);
+
         ActivatePanel(_currentPanel);
     }
 }

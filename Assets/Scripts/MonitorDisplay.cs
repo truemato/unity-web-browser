@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Manages switching between iframe (live site) and screenshot textures.
 /// Attach to each Monitor quad alongside WebPanel.
-/// The quad must have a material with Custom/DoubleSidedUnlit shader assigned.
+/// Supports both URP Lit (_BaseMap) and custom shaders (_MainTex).
 /// </summary>
 public class MonitorDisplay : MonoBehaviour
 {
@@ -15,32 +15,35 @@ public class MonitorDisplay : MonoBehaviour
     private Material _material;
     private bool _completed = false;
     private bool _iframeActive = false;
+    private bool _useBaseMap = false;
 
     void Awake()
     {
         _renderer = GetComponent<MeshRenderer>();
         if (_renderer != null)
         {
-            // Use whatever material is already on the quad (instanced)
             _material = _renderer.material;
+            // Detect if shader uses _BaseMap (URP Lit) or _MainTex
+            _useBaseMap = _material.HasProperty("_BaseMap");
         }
     }
 
-    /// <summary>
-    /// Mark this panel as completed (switches to afterTexture).
-    /// </summary>
+    private void SetTexture(Texture2D tex)
+    {
+        if (_material == null || tex == null) return;
+        if (_useBaseMap)
+            _material.SetTexture("_BaseMap", tex);
+        else
+            _material.mainTexture = tex;
+    }
+
     public void SetCompleted()
     {
         _completed = true;
-        if (!_iframeActive && _material != null)
-        {
-            _material.mainTexture = afterTexture;
-        }
+        if (!_iframeActive)
+            SetTexture(afterTexture);
     }
 
-    /// <summary>
-    /// Show iframe, hide the screenshot texture.
-    /// </summary>
     public void ShowIframe()
     {
         _iframeActive = true;
@@ -48,15 +51,12 @@ public class MonitorDisplay : MonoBehaviour
             _renderer.enabled = false;
     }
 
-    /// <summary>
-    /// Hide iframe, show the appropriate screenshot texture.
-    /// </summary>
     public void ShowTexture()
     {
         _iframeActive = false;
         if (_renderer != null && _material != null)
         {
-            _material.mainTexture = _completed ? afterTexture : beforeTexture;
+            SetTexture(_completed ? afterTexture : beforeTexture);
             _renderer.enabled = true;
         }
     }
