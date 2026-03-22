@@ -28,8 +28,7 @@ a.symbol:hover{filter:brightness(1.2)}
 <div id="liquid"></div>
 <script>
 (function(){
-  if(!sessionStorage.getItem('liquidStart'))
-    sessionStorage.setItem('liquidStart',Date.now());
+  if(!sessionStorage.getItem('liquidStart'))sessionStorage.setItem('liquidStart',Date.now());
   var duration=45;
   var liquid=document.getElementById('liquid');
   function tick(){

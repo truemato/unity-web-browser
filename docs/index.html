@@ -12,8 +12,6 @@ body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:san
   box-shadow:2px 2px 6px rgba(0,0,0,0.3);text-decoration:none;cursor:default;user-select:none}
 a.symbol{cursor:pointer}
 a.symbol:hover{filter:brightness(1.2)}
-#liquid{position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.85);
-  pointer-events:none;z-index:100;transition:none}
 .msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   font-size:18px;color:#888;text-align:center}
 </style>
@@ -21,30 +19,10 @@ a.symbol:hover{filter:brightness(1.2)}
 <body>
 <div class="msg">Find the right symbol.</div>
 <a class="symbol" href="p2.html" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>
-<div id="liquid"></div>
 <script>
-(function(){
-  // Start page always resets the liquid
-  sessionStorage.removeItem('liquidCleared');
-  sessionStorage.setItem('liquidStart',Date.now());
-  var duration=45;
-  var liquid=document.getElementById('liquid');
-  function tick(){
-    var start=Number(sessionStorage.getItem('liquidStart'));
-    var cleared=sessionStorage.getItem('liquidCleared');
-    if(cleared){
-      var ct=(Date.now()-Number(cleared))/1000;
-      var lv=Math.max(1-ct/3,0);
-      liquid.style.height=(lv*100)+'%';
-    }else{
-      var elapsed=(Date.now()-start)/1000;
-      var level=Math.min(elapsed/duration,1);
-      liquid.style.height=(level*100)+'%';
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
+// Reset state; timer starts on p2.html
+sessionStorage.removeItem('liquidCleared');
+sessionStorage.removeItem('liquidStart');
 </script>
 </body>
 </html>
