@@ -18,8 +18,7 @@ public class LevelManager : MonoBehaviour
     [Header("Delay before rotation (seconds)")]
     public float delayBeforeRotation = 3f;
 
-    [Header("Test mode: auto-rotate every N seconds (0 = off)")]
-    public float autoRotateInterval = 3f;
+    private bool _m0Cleared = false;
 
     [Header("Sound Effects")]
     public AudioClip zoomInSE;
@@ -56,11 +55,7 @@ public class LevelManager : MonoBehaviour
         // Start already zoomed in on first panel (no animation)
         SetZoomImmediate(_currentPanel);
 
-        // Auto-rotate starts independently
-        if (autoRotateInterval > 0f)
-        {
-            StartCoroutine(AutoRotateLoop());
-        }
+        // No auto-rotate; wait for M0 clear (PAGE_ARRIVED panelId:0)
     }
 
     private void PlaySFX(AudioClip clip)
@@ -164,30 +159,21 @@ public class LevelManager : MonoBehaviour
         ActivatePanel(_currentPanel);
     }
 
-    private IEnumerator AutoRotateLoop()
-    {
-        yield return new WaitForSeconds(autoRotateInterval);
-
-        while (true)
-        {
-            if (roomManager != null && !roomManager.IsRotating
-                && (cameraZoom == null || !cameraZoom.IsZooming))
-            {
-                if (monitorDisplays != null && _currentPanel < monitorDisplays.Length && monitorDisplays[_currentPanel] != null)
-                    monitorDisplays[_currentPanel].SetCompleted();
-
-                yield return StartCoroutine(RotateSequence());
-            }
-            yield return new WaitForSeconds(autoRotateInterval);
-        }
-    }
-
     public void OnPageArrived(string panelIdStr)
     {
         int panelId;
         if (!int.TryParse(panelIdStr, out panelId)) return;
         if (panelId != _currentPanel) return;
         if (roomManager == null || roomManager.IsRotating) return;
+
+        // Block all rotation until M0 is cleared
+        if (!_m0Cleared)
+        {
+            if (panelId == 0)
+                _m0Cleared = true;
+            else
+                return;
+        }
 
         if (monitorDisplays != null && panelId < monitorDisplays.Length && monitorDisplays[panelId] != null)
             monitorDisplays[panelId].SetCompleted();
