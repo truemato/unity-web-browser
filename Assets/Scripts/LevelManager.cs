@@ -21,8 +21,16 @@ public class LevelManager : MonoBehaviour
     [Header("Test mode: auto-rotate every N seconds (0 = off)")]
     public float autoRotateInterval = 3f;
 
+    [Header("Sound Effects")]
+    public AudioClip zoomInSE;
+    public AudioClip rotateStartSE;
+    public AudioClip ambientSE;
+
     private int _currentPanel = 0;
     private const int TotalPanels = 3;
+    private AudioSource _sfxSource;
+    private AudioSource _ambientSource;
+    private bool _leftM0 = false;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
@@ -32,6 +40,14 @@ public class LevelManager : MonoBehaviour
     void Start()
     {
         Application.runInBackground = true;
+
+        _sfxSource = gameObject.AddComponent<AudioSource>();
+        _sfxSource.playOnAwake = false;
+
+        _ambientSource = gameObject.AddComponent<AudioSource>();
+        _ambientSource.playOnAwake = false;
+        _ambientSource.loop = true;
+
 #if UNITY_WEBGL && !UNITY_EDITOR
         InitBrowser();
 #endif
@@ -44,6 +60,21 @@ public class LevelManager : MonoBehaviour
         if (autoRotateInterval > 0f)
         {
             StartCoroutine(AutoRotateLoop());
+        }
+    }
+
+    private void PlaySFX(AudioClip clip)
+    {
+        if (clip != null && _sfxSource != null)
+            _sfxSource.PlayOneShot(clip);
+    }
+
+    private void StartAmbient()
+    {
+        if (ambientSE != null && _ambientSource != null && !_ambientSource.isPlaying)
+        {
+            _ambientSource.clip = ambientSE;
+            _ambientSource.Play();
         }
     }
 
@@ -105,6 +136,34 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    private IEnumerator RotateSequence()
+    {
+        DeactivateAllPanels();
+        yield return StartCoroutine(TryZoomOutAndWait());
+
+        // Play rotate SE
+        PlaySFX(rotateStartSE);
+
+        // Start ambient on first departure from M0
+        if (!_leftM0)
+        {
+            _leftM0 = true;
+            StartAmbient();
+        }
+
+        roomManager.RotateToNext();
+        yield return new WaitUntil(() => !roomManager.IsRotating);
+
+        _currentPanel = (_currentPanel + 1) % TotalPanels;
+
+        yield return StartCoroutine(TryZoomInAndWait(_currentPanel));
+
+        // Play zoom-in SE
+        PlaySFX(zoomInSE);
+
+        ActivatePanel(_currentPanel);
+    }
+
     private IEnumerator AutoRotateLoop()
     {
         yield return new WaitForSeconds(autoRotateInterval);
@@ -117,21 +176,7 @@ public class LevelManager : MonoBehaviour
                 if (monitorDisplays != null && _currentPanel < monitorDisplays.Length && monitorDisplays[_currentPanel] != null)
                     monitorDisplays[_currentPanel].SetCompleted();
 
-                // 1. Hide iframes, show textures, zoom out
-                DeactivateAllPanels();
-                yield return StartCoroutine(TryZoomOutAndWait());
-
-                // 2. Rotate room
-                roomManager.RotateToNext();
-                yield return new WaitUntil(() => !roomManager.IsRotating);
-
-                _currentPanel = (_currentPanel + 1) % TotalPanels;
-
-                // 3. Zoom in to new monitor
-                yield return StartCoroutine(TryZoomInAndWait(_currentPanel));
-
-                // 4. Show iframe
-                ActivatePanel(_currentPanel);
+                yield return StartCoroutine(RotateSequence());
             }
             yield return new WaitForSeconds(autoRotateInterval);
         }
@@ -153,16 +198,6 @@ public class LevelManager : MonoBehaviour
     private IEnumerator DelayedRotation()
     {
         yield return new WaitForSeconds(delayBeforeRotation);
-
-        DeactivateAllPanels();
-        yield return StartCoroutine(TryZoomOutAndWait());
-
-        roomManager.RotateToNext();
-        yield return new WaitUntil(() => !roomManager.IsRotating);
-
-        _currentPanel = (_currentPanel + 1) % TotalPanels;
-
-        yield return StartCoroutine(TryZoomInAndWait(_currentPanel));
-        ActivatePanel(_currentPanel);
+        yield return StartCoroutine(RotateSequence());
     }
 }
