@@ -4,7 +4,9 @@
 body{width:100vw;height:100vh;background:#1a1a1a;overflow:hidden;font-family:sans-serif;position:relative}
 .s{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:#0f0;background:#333;border:4px solid #555;box-shadow:2px 2px 6px rgba(0,255,0,.15);text-decoration:none;cursor:default;user-select:none;z-index:50}
 a.s{cursor:pointer}a.s:hover{background:#444;box-shadow:0 0 12px rgba(0,255,0,.3)}
-#gameover{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;font-weight:bold;color:#f00;z-index:200;text-shadow:0 0 20px #f00}
+#gameover{display:none;position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);font-size:clamp(2.5rem,6vw,5rem);font-weight:bold;color:transparent;-webkit-text-stroke:2px #fff;text-shadow:0 0 30px rgba(255,255,255,.3);z-index:200;letter-spacing:.15em}
+#retry-btn{display:none;position:fixed;top:58%;left:50%;transform:translateX(-50%);padding:12px 36px;border:1px solid #fff;background:transparent;color:#fff;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;z-index:200}
+#retry-btn:hover{background:rgba(255,255,255,.15)}
 canvas#fluid{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100}
 body.holding{cursor:none}
 body.cursor-fade{cursor:none}
@@ -13,7 +15,7 @@ body.cursor-fade{cursor:none}
 <a class="s" href="p3.html" style="top:25%;right:12%">m</a>
 <div class="s" style="bottom:18%;left:30%">l</div>
 <div class="s" style="bottom:12%;right:10%">k</div>
-<div id="gameover">GAME OVER</div>
+<div id="gameover">GAME OVER</div><button id="retry-btn">Retry</button>
 <canvas id="fluid"></canvas>
 <script>
 if(!sessionStorage.getItem('m2Start')){sessionStorage.setItem('m2Start',Date.now());sessionStorage.removeItem('m2GameOver');}
@@ -60,7 +62,8 @@ document.addEventListener('mouseup',function(){mouseHeld=false;if(cursorFadeTime
 
 var gameOver=false;
 var LASER_HIT_PX=30;
-function triggerGameOver(){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';}
+function triggerGameOver(){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);}
+document.getElementById('retry-btn').addEventListener('click',function(){sessionStorage.removeItem('m2Start');sessionStorage.removeItem('m2Cleared');sessionStorage.removeItem('m2GameOver');location.href='index.html';});
 function checkGameOver(laserScreenY){
   if(gameOver)return;
   if(!mouseHeld&&mouseY>=0){if(Math.abs(mouseY-laserScreenY)<LASER_HIT_PX){triggerGameOver();return;}}

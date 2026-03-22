@@ -363,6 +363,46 @@ canvas#waveCv{
   background:var(--accent-soft);
 }
 
+/* --- game over overlay --- */
+#gameover-overlay{
+  display:none;
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  z-index:300;
+  pointer-events:none;
+}
+#gameover-overlay.active{display:block}
+#gameover-text{
+  position:absolute;
+  top:45%;left:50%;transform:translate(-50%,-50%);
+  font-size:clamp(2.5rem,6vw,5rem);
+  font-family:var(--font-sans);
+  font-weight:bold;
+  letter-spacing:.15em;
+  color:transparent;
+  -webkit-text-stroke:2px #fff;
+  text-shadow:0 0 30px rgba(255,255,255,.3);
+}
+#retry-btn{
+  display:none;
+  position:absolute;
+  top:58%;left:50%;transform:translateX(-50%);
+  padding:12px 36px;
+  border:1px solid #fff;
+  background:transparent;
+  color:#fff;
+  font-family:var(--font-sans);
+  font-size:1rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  cursor:pointer;
+  pointer-events:auto;
+  transition:background .2s;
+}
+#retry-btn:hover{
+  background:rgba(255,255,255,.15);
+}
+
 @media (max-width: 980px){
   .layout{grid-template-columns:1fr}
   .sidebar{

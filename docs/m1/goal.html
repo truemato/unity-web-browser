@@ -8,7 +8,9 @@ a.s{cursor:pointer}a.s:hover{background:#444;box-shadow:0 0 12px rgba(0,255,0,.3
 a.n{cursor:pointer}a.n:hover{background:#3a3a3a;box-shadow:0 0 12px rgba(0,255,0,.3)}
 .ban{position:absolute;top:10%;left:50%;transform:translateX(-50%);background:#0a0;color:#1a1a1a;padding:8px 24px;font-size:22px;font-weight:bold;border-radius:6px;z-index:50}
 #cm{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-weight:bold;color:#0f0;z-index:200}
-#gameover{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;font-weight:bold;color:#f00;z-index:200;text-shadow:0 0 20px #f00}
+#gameover{display:none;position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);font-size:clamp(2.5rem,6vw,5rem);font-weight:bold;color:transparent;-webkit-text-stroke:2px #fff;text-shadow:0 0 30px rgba(255,255,255,.3);z-index:200;letter-spacing:.15em}
+#retry-btn{display:none;position:fixed;top:58%;left:50%;transform:translateX(-50%);padding:12px 36px;border:1px solid #fff;background:transparent;color:#fff;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;z-index:200}
+#retry-btn:hover{background:rgba(255,255,255,.15)}
 canvas#fluid{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100}
 body.holding{cursor:none}
 body.cursor-fade{cursor:none}
@@ -16,7 +18,7 @@ body.cursor-fade{cursor:none}
 <div class="ban">ナツメ</div>
 <a class="n" href="javascript:void(0)" id="clearBtn" style="top:28%;left:50%;transform:translateX(-50%)">5</a>
 <div class="s" style="top:55%;right:15%">e</div>
-<div id="gameover">GAME OVER</div>
+<div id="gameover">GAME OVER</div><button id="retry-btn">Retry</button>
 <canvas id="fluid"></canvas>
 <div id="cm">CLEAR!</div>
 <script>
@@ -68,12 +70,11 @@ document.addEventListener('mouseup',function(){mouseHeld=false;if(cursorFadeTime
 
 var gameOver=false;
 var LASER_HIT_PX=30;
-function triggerGameOver(){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';}
+function triggerGameOver(){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);}
+document.getElementById('retry-btn').addEventListener('click',function(){sessionStorage.removeItem('m2Start');sessionStorage.removeItem('m2Cleared');sessionStorage.removeItem('m2GameOver');location.href='index.html';});
 function checkGameOver(laserScreenY){
   if(gameOver)return;
   if(!mouseHeld&&mouseY>=0){if(Math.abs(mouseY-laserScreenY)<LASER_HIT_PX){triggerGameOver();return;}}
-  var els=document.querySelectorAll('.s,.n,.ban');
-  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(laserScreenY>=r.top&&laserScreenY<=r.bottom){triggerGameOver();return;}}
 }
 
 var lastDrop=0;
