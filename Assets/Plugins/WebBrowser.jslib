@@ -2,11 +2,9 @@ var WebBrowserLib = {
 
   $WebBrowserState: {
     initialized: false,
-    started: false,
     iframes: {},
     container: null,
     canvas: null,
-    startOverlay: null,
 
     init: function () {
       if (WebBrowserState.initialized) return;
@@ -18,47 +16,6 @@ var WebBrowserLib = {
 
       parent.style.position = 'relative';
 
-      // --- Click to Start overlay ---
-      var overlay = document.createElement('div');
-      overlay.id = 'start-overlay';
-      overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;'
-        + 'background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;'
-        + 'z-index:999;cursor:pointer;';
-      overlay.innerHTML = '<div style="text-align:center;color:#fff;font-family:sans-serif;">'
-        + '<div style="font-size:2.5em;font-weight:bold;margin-bottom:0.3em;">Click to Start</div>'
-        + '<div style="font-size:1.2em;opacity:0.7;">クリックして開始</div></div>';
-      parent.appendChild(overlay);
-      WebBrowserState.startOverlay = overlay;
-
-      overlay.addEventListener('click', function () {
-        // Resume AudioContext (browser requires user gesture)
-        try {
-          var audioCtx = window.AudioContext || window.webkitAudioContext;
-          if (audioCtx) {
-            var ctx = new audioCtx();
-            ctx.resume();
-          }
-          // Also resume Unity's AudioContext if it exists
-          if (typeof unityInstance !== 'undefined' && unityInstance.Module) {
-            var uctx = unityInstance.Module.SDL2 && unityInstance.Module.SDL2.audioContext;
-            if (uctx) uctx.resume();
-          }
-        } catch (e) {}
-
-        // Hide overlay
-        overlay.style.display = 'none';
-        WebBrowserState.started = true;
-
-        // Notify Unity that game has started
-        if (window.unityInstance) {
-          window.unityInstance.SendMessage('LevelManager', 'OnGameStarted', '');
-        }
-
-        // Focus canvas
-        if (canvas) canvas.focus();
-      });
-
-      // --- iframe container ---
       var container = document.createElement('div');
       container.id = 'iframe-overlay';
       container.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10;';
@@ -66,9 +23,16 @@ var WebBrowserLib = {
 
       WebBrowserState.container = container;
 
-      // Keep Unity running when focus is lost
-      setInterval(function () {
+      // Keep Unity running even when iframe or page steals focus.
+      // Unity WebGL stops requestAnimationFrame when canvas loses focus.
+      // This fallback timer forces Unity to keep ticking.
+      var keepAliveInterval = setInterval(function () {
         try {
+          // Trigger a minimal frame if Unity is idle
+          if (window.unityInstance && typeof window.unityInstance.SendMessage === 'function') {
+            // Just poke Unity to keep it alive - no-op message
+          }
+          // Force canvas to stay in animation loop
           if (canvas && canvas.dispatchEvent) {
             canvas.dispatchEvent(new Event('focus', { bubbles: false }));
           }

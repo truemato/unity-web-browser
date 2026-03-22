@@ -26,6 +26,30 @@ public class CameraZoom : MonoBehaviour
     public bool IsZooming => _isZooming;
 
     /// <summary>
+    /// Immediately set the camera to the zoomed-in position (no animation).
+    /// </summary>
+    public void SetZoomedIn(Transform monitor)
+    {
+        if (monitor == null) return;
+
+        Vector3 monitorScale = monitor.lossyScale;
+        float monitorHeight = monitorScale.y;
+        float monitorWidth = monitorScale.x;
+
+        float vFov = _cam.fieldOfView * Mathf.Deg2Rad;
+        float distForHeight = (monitorHeight * 0.5f) / Mathf.Tan(vFov * 0.5f);
+
+        float hFov = 2f * Mathf.Atan(Mathf.Tan(vFov * 0.5f) * _cam.aspect);
+        float distForWidth = (monitorWidth * 0.5f) / Mathf.Tan(hFov * 0.5f);
+
+        float requiredDist = Mathf.Max(distForHeight, distForWidth) * marginMultiplier;
+
+        Vector3 toMonitor = (monitor.position - _originalPos).normalized;
+        transform.position = monitor.position - toMonitor * requiredDist;
+        transform.rotation = Quaternion.LookRotation(toMonitor, Vector3.up);
+    }
+
+    /// <summary>
     /// Zoom in toward a monitor transform so it fills the viewport.
     /// </summary>
     public Coroutine ZoomIn(Transform monitor)

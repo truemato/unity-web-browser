@@ -1,249 +1,50 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P0</title>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel 0 - Start</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:sans-serif;position:relative}
-.s{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:#fff;background:#ff00ff;border:4px solid #ccc;box-shadow:2px 2px 6px rgba(0,0,0,.3);text-decoration:none;cursor:default;user-select:none;z-index:50}
-a.s{cursor:pointer}a.s:hover{filter:brightness(1.2)}
-.msg{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-size:16px;color:#888;text-align:center;z-index:10}
-canvas{position:fixed;top:0;left:0;pointer-events:none}
-#splatCv{z-index:90}
-#waveCv{z-index:95}
-</style></head><body>
+.symbol{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:bold;color:#fff;background:#ff00ff;border:4px solid #ccc;
+  box-shadow:2px 2px 6px rgba(0,0,0,0.3);text-decoration:none;cursor:default;user-select:none}
+a.symbol{cursor:pointer}
+a.symbol:hover{filter:brightness(1.2)}
+#liquid{position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.85);
+  pointer-events:none;z-index:100;transition:none}
+.msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:18px;color:#888;text-align:center}
+</style>
+</head>
+<body>
 <div class="msg">Find the right symbol.</div>
-<a class="s" href="p2.html" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>
-
-<canvas id="splatCv"></canvas>
-<canvas id="waveCv"></canvas>
-
+<a class="symbol" href="p2.html" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>
+<div id="liquid"></div>
 <script>
-sessionStorage.removeItem('liquidCleared');sessionStorage.removeItem('liquidClearedLv');
-sessionStorage.setItem('liquidStart',Date.now());
-sessionStorage.setItem('liquidSeed',String(Date.now()%100000));
-sessionStorage.setItem('liquidBonus','0');
-
-function mkRng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
-var rng=mkRng(Number(sessionStorage.getItem('liquidSeed')));
-
-var D=45;
-var splatCv=document.getElementById('splatCv'),sCtx=splatCv.getContext('2d');
-var waveCv=document.getElementById('waveCv'),wCtx=waveCv.getContext('2d');
-var W,H;
-
-function resize(){
-  W=window.innerWidth;H=window.innerHeight;
-  splatCv.width=W;splatCv.height=H;
-  waveCv.width=W;waveCv.height=H;
-}
-resize();
-window.addEventListener('resize',resize);
-
-/* === Splat system (persistent, accumulates on splatCv) === */
-function drawSplat(x,y,size){
-  sCtx.save();
-  sCtx.translate(x,y);
-  // main body - irregular tomato crush shape
-  var pts=[];
-  var arms=7+Math.floor(rng()*5); // 7-11 arms for irregular shape
-  for(var i=0;i<arms;i++){
-    var a=Math.PI*2*i/arms;
-    var r=size*(0.5+rng()*0.5);
-    // some arms extend further (splatter streaks)
-    if(rng()<0.3) r*=1.4+rng()*0.8;
-    pts.push({x:Math.cos(a)*r,y:Math.sin(a)*r});
-  }
-
-  // draw blurred edge layer first (larger, semi-transparent)
-  sCtx.globalAlpha=0.4;
-  sCtx.filter='blur('+Math.max(8,size*0.2)+'px)';
-  sCtx.beginPath();
-  sCtx.moveTo(pts[0].x*1.3,pts[0].y*1.3);
-  for(var i=1;i<pts.length;i++){
-    var prev=pts[i-1],cur=pts[i];
-    var cx=(prev.x*1.3+cur.x*1.3)/2+rng()*size*0.3-size*0.15;
-    var cy=(prev.y*1.3+cur.y*1.3)/2+rng()*size*0.3-size*0.15;
-    sCtx.quadraticCurveTo(cx,cy,cur.x*1.3,cur.y*1.3);
-  }
-  sCtx.closePath();
-  sCtx.fillStyle='#000';
-  sCtx.fill();
-
-  // draw solid center (no blur, fully opaque)
-  sCtx.filter='none';
-  sCtx.globalAlpha=0.9;
-  sCtx.beginPath();
-  sCtx.moveTo(pts[0].x,pts[0].y);
-  for(var i=1;i<pts.length;i++){
-    var prev=pts[i-1],cur=pts[i];
-    var cx=(prev.x+cur.x)/2+rng()*size*0.15-size*0.075;
-    var cy=(prev.y+cur.y)/2+rng()*size*0.15-size*0.075;
-    sCtx.quadraticCurveTo(cx,cy,cur.x,cur.y);
-  }
-  sCtx.closePath();
-  sCtx.fillStyle='#111';
-  sCtx.fill();
-
-  // small satellite droplets around splat
-  var nDrops=3+Math.floor(rng()*5);
-  sCtx.filter='blur(2px)';
-  sCtx.globalAlpha=0.7;
-  for(var i=0;i<nDrops;i++){
-    var da=rng()*Math.PI*2;
-    var dd=size*(0.8+rng()*1.2);
-    var dr=3+rng()*6;
-    sCtx.beginPath();
-    sCtx.arc(Math.cos(da)*dd,Math.sin(da)*dd,dr,0,Math.PI*2);
-    sCtx.fill();
-  }
-
-  sCtx.restore();
-}
-
-/* === Falling blobs === */
-var blobs=[];
-var EXPLODE_CHANCE=0.12; // 12% chance to explode mid-air
-var spawnTimer=0;
-var spawnInterval=0.8; // seconds between spawns initially
-
-function spawnBlob(){
-  blobs.push({
-    x:rng()*W,
-    y:-30-rng()*60,
-    r:12+rng()*20,
-    vx:(rng()-0.5)*30,
-    vy:40+rng()*80,
-    willExplode:rng()<EXPLODE_CHANCE,
-    explodeY:H*0.2+rng()*H*0.5, // explode somewhere in upper-mid screen
-    alive:true
-  });
-}
-
-/* === Wavy surface === */
-function getWaveY(x,t,lv){
-  var baseY=H*(1-lv);
-  // sum of multiple sine waves for organic feel
-  var w=0;
-  w+=Math.sin(x*0.008+t*1.2)*8;
-  w+=Math.sin(x*0.015+t*0.8+1.3)*5;
-  w+=Math.sin(x*0.025+t*2.0+2.7)*3;
-  w+=Math.sin(x*0.004+t*0.5)*12;
-  return baseY+w;
-}
-
-function drawWave(t,lv){
-  wCtx.clearRect(0,0,W,H);
-  if(lv<=0)return;
-
-  // draw liquid body
-  wCtx.beginPath();
-  wCtx.moveTo(0,H+1);
-  for(var x=0;x<=W;x+=3){
-    wCtx.lineTo(x,getWaveY(x,t,lv));
-  }
-  wCtx.lineTo(W,H+1);
-  wCtx.closePath();
-  wCtx.fillStyle='#111';
-  wCtx.fill();
-
-  // surface highlight (thin lighter line at top of wave)
-  wCtx.beginPath();
-  for(var x=0;x<=W;x+=3){
-    var wy=getWaveY(x,t,lv);
-    if(x===0)wCtx.moveTo(x,wy);
-    else wCtx.lineTo(x,wy);
-  }
-  wCtx.strokeStyle='rgba(60,60,60,0.6)';
-  wCtx.lineWidth=2;
-  wCtx.stroke();
-
-  // draw falling blobs on wave canvas (they're part of the animated layer)
-  for(var i=0;i<blobs.length;i++){
-    var b=blobs[i];
-    if(!b.alive)continue;
-    // gooey blob shape
-    wCtx.beginPath();
-    wCtx.arc(b.x,b.y,b.r,0,Math.PI*2);
-    wCtx.fillStyle='#111';
-    wCtx.fill();
-    // slight highlight
-    wCtx.beginPath();
-    wCtx.arc(b.x-b.r*0.2,b.y-b.r*0.2,b.r*0.35,0,Math.PI*2);
-    wCtx.fillStyle='rgba(80,80,80,0.3)';
-    wCtx.fill();
-  }
-}
-
-/* === SVG filter on wave canvas for metaball merging === */
-var svgNS='http://www.w3.org/2000/svg';
-var svg=document.createElementNS(svgNS,'svg');
-svg.style.cssText='position:absolute;width:0;height:0';
-svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7"/></filter>';
-document.body.appendChild(svg);
-waveCv.style.filter='url(#goo)';
-
-/* === Main loop === */
-var lastTime=performance.now();
-var waterBonus=Number(sessionStorage.getItem('liquidBonus'))||0;
-
-function tick(now){
-  var dt=(now-lastTime)/1000;
-  lastTime=now;
-  var t=now/1000;
-
-  // compute liquid level
-  var cl=sessionStorage.getItem('liquidCleared'),lv;
-  if(cl){var ct=(Date.now()-Number(cl))/1000;var clLv=Number(sessionStorage.getItem('liquidClearedLv'))||1;lv=Math.max(clLv*(1-ct/3),0);}
-  else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
-
-  // add bonus from absorbed blobs (up to 15% extra)
-  var totalLv=Math.min(lv+waterBonus,1);
-
-  // spawn blobs - rate increases as level rises
-  spawnInterval=Math.max(0.4,1.0-lv*0.5);
-  spawnTimer+=dt;
-  if(spawnTimer>=spawnInterval && blobs.length<30){
-    spawnBlob();
-    spawnTimer=0;
-  }
-
-  // update blobs
-  var surfaceY=H*(1-totalLv);
-  for(var i=blobs.length-1;i>=0;i--){
-    var b=blobs[i];
-    if(!b.alive)continue;
-
-    b.vy+=120*dt; // gravity
-    b.x+=b.vx*dt;
-    b.y+=b.vy*dt;
-
-    // check for mid-air explosion
-    if(b.willExplode && b.y>=b.explodeY){
-      drawSplat(b.x,b.y,b.r*2+rng()*15);
-      b.alive=false;
-      continue;
+(function(){
+  // Start page always resets the liquid
+  sessionStorage.removeItem('liquidCleared');
+  sessionStorage.setItem('liquidStart',Date.now());
+  var duration=45;
+  var liquid=document.getElementById('liquid');
+  function tick(){
+    var start=Number(sessionStorage.getItem('liquidStart'));
+    var cleared=sessionStorage.getItem('liquidCleared');
+    if(cleared){
+      var ct=(Date.now()-Number(cleared))/1000;
+      var lv=Math.max(1-ct/3,0);
+      liquid.style.height=(lv*100)+'%';
+    }else{
+      var elapsed=(Date.now()-start)/1000;
+      var level=Math.min(elapsed/duration,1);
+      liquid.style.height=(level*100)+'%';
     }
-
-    // check for surface collision
-    var wy=getWaveY(b.x,t,totalLv);
-    if(b.y+b.r>=wy){
-      waterBonus+=0.001;
-      sessionStorage.setItem('liquidBonus',waterBonus);
-      b.alive=false;
-      continue;
-    }
-
-    // remove if off screen
-    if(b.x<-50||b.x>W+50||b.y>H+50){
-      b.alive=false;
-    }
+    requestAnimationFrame(tick);
   }
-
-  // clean up dead blobs periodically
-  if(blobs.length>40){
-    blobs=blobs.filter(function(b){return b.alive;});
-  }
-
-  drawWave(t,totalLv);
-  requestAnimationFrame(tick);
-}
-requestAnimationFrame(tick);
-</script></body></html>
+  tick();
+})();
+</script>
+</body>
+</html>

@@ -29,7 +29,6 @@ public class WebPanel : MonoBehaviour
 #endif
 
     private bool _created = false;
-    private bool _loaded = false;
     private Camera _cam;
     private bool _forceHidden = false;
 
@@ -37,8 +36,8 @@ public class WebPanel : MonoBehaviour
     {
         _cam = Camera.main;
 #if UNITY_WEBGL && !UNITY_EDITOR
-        // Create iframe with about:blank; actual URL loaded on ActivatePanel
-        CreateIframe("about:blank", panelId, iframeWidth, iframeHeight);
+        CreateIframe(siteURL, panelId, iframeWidth, iframeHeight);
+        // Start hidden until LevelManager says to show
         UpdateIframeRect(panelId, 0, 0, 0, 0, false);
         _forceHidden = true;
 #endif
@@ -58,18 +57,10 @@ public class WebPanel : MonoBehaviour
 
     /// <summary>
     /// Allow the iframe to be shown (position tracked in LateUpdate).
-    /// Loads the actual URL on first show.
     /// </summary>
     public void ForceShow()
     {
         _forceHidden = false;
-#if UNITY_WEBGL && !UNITY_EDITOR
-        if (_created && !_loaded)
-        {
-            _loaded = true;
-            UpdateIframeURL(panelId, siteURL);
-        }
-#endif
     }
 
     void LateUpdate()
