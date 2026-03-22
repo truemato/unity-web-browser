@@ -38,8 +38,7 @@ var D=45,cleared=false;
 document.getElementById('clearBtn').addEventListener('click',function(){
   if(cleared)return;cleared=true;
   sessionStorage.setItem('m2Cleared',Date.now());
-  document.getElementById('cm').style.display='block';
-  window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');
+  setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');},7000);
 });
 
 var splatCv=document.getElementById('splatCv'),sCtx=splatCv.getContext('2d');

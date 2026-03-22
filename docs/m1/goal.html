@@ -32,8 +32,8 @@ var rng=mkRng(Number(sessionStorage.getItem('m2Seed'))||12345);
 var D=45,cleared=false;
 
 document.getElementById('clearBtn').addEventListener('click',function(){if(cleared)return;cleared=true;
-sessionStorage.setItem('m2Cleared',Date.now());document.getElementById('cm').style.display='block';
-window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');});
+sessionStorage.setItem('m2Cleared',Date.now());
+setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');},7000);});
 
 var canvas=document.getElementById('fluid');
 var gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:false});
