@@ -129,6 +129,7 @@ function checkGameOver(laserScreenY){
       gameOver=true;
       sessionStorage.setItem('m2GameOver','1');
       document.getElementById('gameover').style.display='block';
+      setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');},3000);
       return;
     }
   }

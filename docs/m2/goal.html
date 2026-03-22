@@ -63,7 +63,7 @@ var gameOver=false;
 function checkGameOver(laserScreenY){
   if(gameOver)return;
   var els=document.querySelectorAll('.s,.n,.ban');
-  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(laserScreenY>=r.top&&laserScreenY<=r.bottom){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';return;}}
+  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(laserScreenY>=r.top&&laserScreenY<=r.bottom){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');},3000);return;}}
 }
 
 var lastDrop=0;
