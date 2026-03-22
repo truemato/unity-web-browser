@@ -7,6 +7,8 @@ a.s{cursor:pointer}a.s:hover{background:#444;box-shadow:0 0 12px rgba(0,255,0,.3
 .n{position:absolute;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:#0f0;background:#2a2a2a;z-index:50}
 #gameover{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;font-weight:bold;color:#f00;z-index:200;text-shadow:0 0 20px #f00}
 canvas#fluid{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100}
+body.holding{cursor:none}
+body.cursor-fade{cursor:none}
 </style></head><body>
 <div class="s" style="top:30%;left:12%">d</div>
 <div class="s" style="top:25%;right:8%">m</div>
@@ -53,11 +55,19 @@ function addDrop(cx,cy,radius,strength){gl.useProgram(dropProg);gl.bindFramebuff
 function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
+var mouseX=-1,mouseY=-1,mouseHeld=false,cursorFadeTimer=null;
+document.addEventListener('mousemove',function(e){mouseX=e.clientX;mouseY=e.clientY;});
+document.addEventListener('mousedown',function(){mouseHeld=true;if(cursorFadeTimer)clearTimeout(cursorFadeTimer);cursorFadeTimer=setTimeout(function(){document.body.classList.add('holding');},100);document.body.classList.add('cursor-fade');});
+document.addEventListener('mouseup',function(){mouseHeld=false;if(cursorFadeTimer){clearTimeout(cursorFadeTimer);cursorFadeTimer=null;}document.body.classList.remove('holding','cursor-fade');});
+
 var gameOver=false;
+var LASER_HIT_PX=30;
+function triggerGameOver(){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';}
 function checkGameOver(laserScreenY){
   if(gameOver)return;
+  if(!mouseHeld&&mouseY>=0){if(Math.abs(mouseY-laserScreenY)<LASER_HIT_PX){triggerGameOver();return;}}
   var els=document.querySelectorAll('.s,.n');
-  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(laserScreenY>=r.top&&laserScreenY<=r.bottom){gameOver=true;sessionStorage.setItem('m2GameOver','1');document.getElementById('gameover').style.display='block';return;}}
+  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(laserScreenY>=r.top&&laserScreenY<=r.bottom){triggerGameOver();return;}}
 }
 
 var lastDrop=0;

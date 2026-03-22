@@ -7,6 +7,8 @@ a.s{cursor:pointer}a.s:hover{background:#444;box-shadow:0 0 12px rgba(0,255,0,.3
 .msg{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-size:16px;color:#0a0;z-index:10}
 #gameover{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;font-weight:bold;color:#f00;z-index:200;text-shadow:0 0 20px #f00}
 canvas#fluid{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100}
+body.holding{cursor:none}
+body.cursor-fade{cursor:none}
 </style></head><body>
 <div class="msg">Find the right symbol.</div>
 <a class="s" href="p2.html" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>
@@ -179,19 +181,40 @@ function addDrop(cx,cy,radius,strength){
 function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
+/* --- Mouse tracking & cursor hide --- */
+var mouseX=-1,mouseY=-1,mouseHeld=false,cursorFadeTimer=null;
+document.addEventListener('mousemove',function(e){mouseX=e.clientX;mouseY=e.clientY;});
+document.addEventListener('mousedown',function(){
+  mouseHeld=true;
+  if(cursorFadeTimer)clearTimeout(cursorFadeTimer);
+  cursorFadeTimer=setTimeout(function(){document.body.classList.add('holding');},100);
+  document.body.classList.add('cursor-fade');
+});
+document.addEventListener('mouseup',function(){
+  mouseHeld=false;
+  if(cursorFadeTimer){clearTimeout(cursorFadeTimer);cursorFadeTimer=null;}
+  document.body.classList.remove('holding','cursor-fade');
+});
+
 /* --- Game over detection --- */
 var gameOver=false;
+var LASER_HIT_PX=30; /* how close cursor must be to laser line */
+function triggerGameOver(){
+  gameOver=true;
+  sessionStorage.setItem('m2GameOver','1');
+  document.getElementById('gameover').style.display='block';
+}
 function checkGameOver(laserScreenY){
   if(gameOver)return;
+  /* cursor hit (only when not holding) */
+  if(!mouseHeld&&mouseY>=0){
+    if(Math.abs(mouseY-laserScreenY)<LASER_HIT_PX){triggerGameOver();return;}
+  }
+  /* element hit */
   var els=document.querySelectorAll('.s');
   for(var i=0;i<els.length;i++){
     var r=els[i].getBoundingClientRect();
-    if(laserScreenY>=r.top&&laserScreenY<=r.bottom){
-      gameOver=true;
-      sessionStorage.setItem('m2GameOver','1');
-      document.getElementById('gameover').style.display='block';
-      return;
-    }
+    if(laserScreenY>=r.top&&laserScreenY<=r.bottom){triggerGameOver();return;}
   }
 }
 
