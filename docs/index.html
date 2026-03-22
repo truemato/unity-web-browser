@@ -1,28 +1,39 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panel 0 - Start</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:sans-serif;position:relative}
-.symbol{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;
-  font-size:28px;font-weight:bold;color:#fff;background:#ff00ff;border:4px solid #ccc;
-  box-shadow:2px 2px 6px rgba(0,0,0,0.3);text-decoration:none;cursor:default;user-select:none}
-a.symbol{cursor:pointer}
-a.symbol:hover{filter:brightness(1.2)}
-.msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:18px;color:#888;text-align:center}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KAZUKI Hata | Exhibitions</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="msg">Find the right symbol.</div>
-<a class="symbol" href="p2.html" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1 class="brand">KAZUKI Hata</h1>
+      <nav class="nav" aria-label="Primary">
+        <a href="index.html" aria-current="page">Exhibitions</a>
+        <a href="biography.html">Biography</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <div class="gallery">
+        <div class="gallery-item">
+          <img src="TY01.png" alt="TY01">
+        </div>
+        <div class="gallery-item">
+          <img src="TY02.png" alt="TY02" style="width:50%">
+        </div>
+        <div class="gallery-item" style="display:flex;justify-content:flex-end">
+          <img src="TY03.png" alt="TY03" style="width:50%">
+        </div>
+      </div>
+    </main>
+  </div>
 <script>
-// Reset state; timer starts on p2.html
 sessionStorage.removeItem('liquidCleared');
 sessionStorage.removeItem('liquidStart');
+sessionStorage.removeItem('liquidGameOver');
 </script>
 </body>
 </html>
