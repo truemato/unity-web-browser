@@ -64,15 +64,13 @@ function triggerGameOver(){gameOver=true;sessionStorage.setItem('m2GameOver','1'
 function checkGameOver(laserScreenY){
   if(gameOver)return;
   if(!mouseHeld&&mouseY>=0){if(Math.abs(mouseY-laserScreenY)<LASER_HIT_PX){triggerGameOver();return;}}
-  var els=document.querySelectorAll('.s');
-  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(laserScreenY>=r.top&&laserScreenY<=r.bottom){triggerGameOver();return;}}
 }
 
 var lastDrop=0;
 function tick(){
   var cl=sessionStorage.getItem('m2Cleared'),prog;
   if(cl){var ct=(Date.now()-Number(cl))/1000;prog=Math.max(1-ct/3,0);}
-  else{var el=(Date.now()-Number(sessionStorage.getItem('m2Start')))/1000;prog=Math.min(el/D,1);}
+  else{var el=(Date.now()-Number(sessionStorage.getItem('m2Start')))/1000;var halfP=D/2;var phase=(el/halfP)%2;prog=phase<=1?phase:2-phase;}
   var laserY=prog,laserScreenY=prog*window.innerHeight;
   if(!gameOver)checkGameOver(laserScreenY);
 
