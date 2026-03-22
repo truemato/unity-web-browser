@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panel 0 - Page 2</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panel 0 - Page 2</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:sans-serif;position:relative}
@@ -12,41 +7,32 @@ body{width:100vw;height:100vh;background:#e0e0e0;overflow:hidden;font-family:san
   box-shadow:2px 2px 6px rgba(0,0,0,0.3);text-decoration:none;cursor:default;user-select:none}
 a.symbol{cursor:pointer}
 a.symbol:hover{filter:brightness(1.2)}
-#liquid{position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.85);
-  pointer-events:none;z-index:100}
-</style>
-</head>
-<body>
-<!-- i: center-left -->
+#lc{position:fixed;bottom:0;left:0;width:100%;pointer-events:none;z-index:100}
+</style></head><body>
+<svg style="position:absolute;width:0;height:0"><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -8"/></filter></svg>
 <div class="symbol" style="top:40%;left:35%">i</div>
-<!-- m: top-right (LINK) -->
 <a class="symbol" href="p3.html" style="top:25%;right:12%">m</a>
-<!-- l: bottom-center-left -->
 <div class="symbol" style="bottom:18%;left:30%">l</div>
-<!-- k: bottom-right -->
 <div class="symbol" style="bottom:12%;right:10%">k</div>
-<div id="liquid"></div>
+<canvas id="lc"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <script>
-(function(){
-  if(!sessionStorage.getItem('liquidStart'))sessionStorage.setItem('liquidStart',Date.now());
-  var duration=45;
-  var liquid=document.getElementById('liquid');
-  function tick(){
-    var start=Number(sessionStorage.getItem('liquidStart'));
-    var cleared=sessionStorage.getItem('liquidCleared');
-    if(cleared){
-      var ct=(Date.now()-Number(cleared))/1000;
-      var lv=Math.max(1-ct/3,0);
-      liquid.style.height=(lv*100)+'%';
-    }else{
-      var elapsed=(Date.now()-start)/1000;
-      var level=Math.min(elapsed/duration,1);
-      liquid.style.height=(level*100)+'%';
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-</script>
-</body>
-</html>
+if(!sessionStorage.getItem('liquidStart'))sessionStorage.setItem('liquidStart',Date.now());
+function mkRng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+var rng=mkRng(Number(sessionStorage.getItem('liquidSeed'))||12345);
+var D=45,cv=document.getElementById('lc'),ctx=cv.getContext('2d');
+cv.width=window.innerWidth;cv.height=window.innerHeight;var W=cv.width,H=cv.height;
+var Engine=Matter.Engine,Bodies=Matter.Bodies,Composite=Matter.Composite,Runner=Matter.Runner;
+var engine=Engine.create({gravity:{x:0,y:-0.5}});
+Composite.add(engine.world,[Bodies.rectangle(W/2,-20,W+100,40,{isStatic:true}),Bodies.rectangle(-20,H/2,40,H,{isStatic:true}),Bodies.rectangle(W+20,H/2,40,H,{isStatic:true})]);
+var balls=[];for(var i=0;i<40;i++){var r=8+rng()*15;balls.push(Bodies.circle(rng()*W,H+50+rng()*100,r,{restitution:.2,friction:.05}));}
+Composite.add(engine.world,balls);var ceiling=null;Runner.run(Runner.create(),engine);
+function tick(){var cl=sessionStorage.getItem('liquidCleared'),lv;
+if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
+else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
+var cY=H*(1-lv);if(ceiling)Composite.remove(engine.world,ceiling);
+ceiling=Bodies.rectangle(W/2,cY,W+100,40,{isStatic:true});Composite.add(engine.world,[ceiling]);
+ctx.clearRect(0,0,W,H);ctx.fillStyle='#222';
+for(var i=0;i<balls.length;i++){var b=balls[i];ctx.beginPath();ctx.arc(b.position.x,b.position.y,b.circleRadius,0,Math.PI*2);ctx.fill();}
+ctx.fillRect(0,cY+10,W,H);requestAnimationFrame(tick);}tick();cv.style.filter='url(#goo)';
+</script></body></html>
