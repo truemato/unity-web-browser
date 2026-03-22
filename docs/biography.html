@@ -128,7 +128,6 @@
     </main>
   </div>
 
-<div id="gameover-overlay"><div id="gameover-text">GAME OVER</div><button id="retry-btn">Retry</button></div>
 <canvas id="splatCv" class="liquid-overlay"></canvas>
 <canvas id="waveCv" class="liquid-overlay"></canvas>
 
@@ -181,18 +180,6 @@ svg.style.cssText='position:absolute;width:0;height:0';
 svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7"/></filter>';
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
-var gameOver=false;
-function triggerGameOver(){
-  if(gameOver)return;gameOver=true;
-  sessionStorage.setItem('liquidGameOver','1');
-  document.getElementById('gameover-overlay').classList.add('active');
-  setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);
-}
-document.getElementById('retry-btn').addEventListener('click',function(){
-  sessionStorage.removeItem('liquidStart');sessionStorage.removeItem('liquidCleared');sessionStorage.removeItem('liquidGameOver');
-  location.href='index.html';
-});
-
 var lastTime=performance.now(),waterBonus=0;
 function tick(now){
   var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
@@ -200,7 +187,6 @@ function tick(now){
   if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
   else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
   var totalLv=Math.min(lv+waterBonus,1);
-  if(!gameOver&&totalLv>=1.0)triggerGameOver();
   spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;
   if(spawnTimer>=spawnInterval&&blobs.length<30){spawnBlob();spawnTimer=0;}
   for(var i=blobs.length-1;i>=0;i--){var b=blobs[i];if(!b.alive)continue;b.vy+=120*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
