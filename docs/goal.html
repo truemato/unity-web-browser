@@ -19,10 +19,9 @@
     <main class="content" style="position:relative;min-height:80vh">
       <a class="clear-btn" href="javascript:void(0)" id="clearBtn">5</a>
       <div class="s" style="position:absolute;top:55%;right:15%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">d</div>
+      <div id="gameover-overlay"><div id="gameover-text">GAME OVER</div><button id="retry-btn">Retry</button></div>
     </main>
   </div>
-
-<div id="cm">CLEAR!</div>
 
 <canvas id="splatCv" class="liquid-overlay"></canvas>
 <canvas id="waveCv" class="liquid-overlay"></canvas>
@@ -33,7 +32,7 @@ if(!sessionStorage.getItem('liquidSeed'))sessionStorage.setItem('liquidSeed',Mat
 function mkRng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
 var rng=mkRng(Number(sessionStorage.getItem('liquidSeed'))||12345);
 
-var D=45,cleared=false;
+var D=45,cleared=false,gameOver=false;
 var splatCv=document.getElementById('splatCv'),sCtx=splatCv.getContext('2d');
 var waveCv=document.getElementById('waveCv'),wCtx=waveCv.getContext('2d');
 var W,H;
@@ -68,7 +67,9 @@ function drawWave(t,lv){
   wCtx.lineTo(W,H+1);wCtx.closePath();wCtx.fillStyle='#111';wCtx.fill();
   wCtx.beginPath();for(var x=0;x<=W;x+=3){var wy=getWaveY(x,t,lv);if(x===0)wCtx.moveTo(x,wy);else wCtx.lineTo(x,wy);}
   wCtx.strokeStyle='rgba(60,60,60,0.6)';wCtx.lineWidth=2;wCtx.stroke();
-  for(var i=0;i<blobs.length;i++){var b=blobs[i];if(!b.alive)continue;wCtx.beginPath();wCtx.arc(b.x,b.y,b.r,0,Math.PI*2);wCtx.fillStyle='#111';wCtx.fill();wCtx.beginPath();wCtx.arc(b.x-b.r*0.2,b.y-b.r*0.2,b.r*0.35,0,Math.PI*2);wCtx.fillStyle='rgba(80,80,80,0.3)';wCtx.fill();}
+  if(!cleared){
+    for(var i=0;i<blobs.length;i++){var b=blobs[i];if(!b.alive)continue;wCtx.beginPath();wCtx.arc(b.x,b.y,b.r,0,Math.PI*2);wCtx.fillStyle='#111';wCtx.fill();wCtx.beginPath();wCtx.arc(b.x-b.r*0.2,b.y-b.r*0.2,b.r*0.35,0,Math.PI*2);wCtx.fillStyle='rgba(80,80,80,0.3)';wCtx.fill();}
+  }
 }
 
 var svgNS='http://www.w3.org/2000/svg',svg=document.createElementNS(svgNS,'svg');
@@ -76,26 +77,89 @@ svg.style.cssText='position:absolute;width:0;height:0';
 svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7"/></filter>';
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
+// --- BGM ---
+var bgm=new Audio('2026-03-23_stage1.wav');
+bgm.loop=true;bgm.volume=0;
+var bgmStarted=false,bgmFadeIn=false,bgmSlowing=false,bgmSlowStart=0;
+var audioCtx,bgmSource;
+
+function initAudioCtx(){
+  if(audioCtx)return;
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  bgmSource=audioCtx.createMediaElementSource(bgm);
+  bgmSource.connect(audioCtx.destination);
+}
+
+// --- Game Over ---
+function triggerGameOver(){
+  if(gameOver||cleared)return;gameOver=true;
+  sessionStorage.setItem('liquidGameOver','1');
+  document.getElementById('gameover-overlay').classList.add('active');
+  setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);
+  // BGM slow down
+  if(bgmStarted){bgmSlowing=true;bgmSlowStart=performance.now();bgmFadeIn=false;}
+}
+document.getElementById('retry-btn').addEventListener('click',function(){
+  sessionStorage.removeItem('liquidStart');sessionStorage.removeItem('liquidCleared');sessionStorage.removeItem('liquidGameOver');sessionStorage.removeItem('liquidSeed');
+  location.href='index.html';
+});
+
+// --- Clear ---
+var clearLv=0,clearTime=0;
 document.getElementById('clearBtn').addEventListener('click',function(){
-  if(cleared)return;cleared=true;
+  if(cleared||gameOver)return;cleared=true;
+  clearTime=performance.now();
+  // capture current water level
+  var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
+  clearLv=Math.min(el/D+waterBonus,1);
   sessionStorage.setItem('liquidCleared',Date.now());
-  setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');},7000);
+  // clear all splats immediately
+  sCtx.clearRect(0,0,W,H);
+  blobs=[];
+  // stop BGM
+  bgmFadeIn=false;bgm.pause();
+  // rotate after 10s
+  setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');},10000);
 });
 
 var lastTime=performance.now(),waterBonus=0;
 function tick(now){
   var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
-  var cl=sessionStorage.getItem('liquidCleared'),lv;
-  if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
-  else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
-  var totalLv=Math.min(lv+waterBonus,1);
-  spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;
-  if(spawnTimer>=spawnInterval&&blobs.length<30){spawnBlob();spawnTimer=0;}
-  for(var i=blobs.length-1;i>=0;i--){var b=blobs[i];if(!b.alive)continue;b.vy+=120*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
-    if(b.willExplode&&b.y>=b.explodeY){drawSplat(b.x,b.y,b.r*2+rng()*15);b.alive=false;continue;}
-    if(b.y+b.r>=getWaveY(b.x,t,totalLv)){waterBonus+=0.001;b.alive=false;continue;}
-    if(b.x<-50||b.x>W+50||b.y>H+50)b.alive=false;}
-  if(blobs.length>40)blobs=blobs.filter(function(b){return b.alive;});
+  var lv;
+  if(cleared){
+    // drain from captured level
+    var ct=(now-clearTime)/1000;
+    lv=Math.max(clearLv*(1-ct/3),0);
+  } else {
+    var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
+    lv=Math.min(el/D,1);
+  }
+  var totalLv=cleared?lv:Math.min(lv+waterBonus,1);
+  // Game over check
+  if(!gameOver&&!cleared&&totalLv>=1.0)triggerGameOver();
+  // BGM: start after 10s silence, fade in over 5s
+  if(!bgmStarted&&!cleared&&!gameOver){
+    var el2=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
+    if(el2>=0){initAudioCtx();bgm.play().catch(function(){});bgmStarted=true;bgmFadeIn=true;}
+  }
+  if(bgmFadeIn&&bgm.volume<1){bgm.volume=Math.min(1,bgm.volume+dt/5);}
+  // BGM slow down on game over (6s)
+  if(bgmSlowing&&audioCtx){
+    var elapsed=(now-bgmSlowStart)/1000;
+    var rate=Math.max(0.1,1-elapsed/6*0.9);
+    bgm.playbackRate=rate;
+    bgm.volume=Math.max(0,1-elapsed/6);
+    if(elapsed>=6){bgm.pause();bgmSlowing=false;}
+  }
+  if(!cleared){
+    spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;
+    if(spawnTimer>=spawnInterval&&blobs.length<30){spawnBlob();spawnTimer=0;}
+    for(var i=blobs.length-1;i>=0;i--){var b=blobs[i];if(!b.alive)continue;b.vy+=120*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
+      if(b.willExplode&&b.y>=b.explodeY){drawSplat(b.x,b.y,b.r*2+rng()*15);b.alive=false;continue;}
+      if(b.y+b.r>=getWaveY(b.x,t,totalLv)){waterBonus+=0.001;b.alive=false;continue;}
+      if(b.x<-50||b.x>W+50||b.y>H+50)b.alive=false;}
+    if(blobs.length>40)blobs=blobs.filter(function(b){return b.alive;});
+  }
   drawWave(t,totalLv);requestAnimationFrame(tick);}
 requestAnimationFrame(tick);
 </script>
