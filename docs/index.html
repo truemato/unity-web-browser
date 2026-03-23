@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KAZUKI Hata | Exhibitions</title>
+  <title>KAZUKI Hata</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,29 +11,412 @@
     <aside class="sidebar">
       <h1 class="brand">KAZUKI Hata</h1>
       <nav class="nav" aria-label="Primary">
-        <a href="index.html" aria-current="page">Exhibitions</a>
-        <a href="biography.html">Biography</a>
-        <a href="contact.html">Contact</a>
+        <a href="#" data-page="start" id="nav-exhibitions">Exhibitions</a>
+        <a href="#" data-page="biography" id="nav-biography">Biography</a>
+        <a href="#" data-page="contact" id="nav-contact">Contact</a>
       </nav>
     </aside>
-    <main class="content">
-      <div class="gallery">
-        <div class="gallery-item">
-          <img src="TY01.png" alt="TY01">
-        </div>
-        <div class="gallery-item">
-          <img src="TY02.png" alt="TY02" style="width:50%">
-        </div>
-        <div class="gallery-item" style="display:flex;justify-content:flex-end">
-          <img src="TY03.png" alt="TY03" style="width:50%">
-        </div>
-      </div>
-    </main>
+    <main class="content" id="main" style="position:relative;min-height:80vh"></main>
   </div>
+
+  <div id="gameover-overlay"><div id="gameover-text">GAME OVER</div><button id="retry-btn">Retry</button></div>
+
+  <canvas id="splatCv" class="liquid-overlay"></canvas>
+  <canvas id="waveCv" class="liquid-overlay"></canvas>
+
 <script>
+// ============================================================
+// SPA Router & Page Definitions
+// ============================================================
+var currentPage='start';
+var pages={
+  start:{
+    title:'Exhibitions',
+    nav:'exhibitions',
+    html:'<div class="gallery">'
+      +'<div class="gallery-item"><img src="TY01.png" alt="TY01"></div>'
+      +'<div class="gallery-item"><img src="TY02.png" alt="TY02" style="width:50%"></div>'
+      +'<div class="gallery-item" style="display:flex;justify-content:flex-end"><img src="TY03.png" alt="TY03" style="width:50%"></div>'
+      +'</div>'
+  },
+  biography:{
+    title:'Biography',
+    nav:'biography',
+    html:'<header class="page-header"><p class="eyebrow">Biography</p><h1>Chronology</h1></header>'
+      +'<section class="section"><h2>Profile</h2><div class="timeline">'
+      +'<article class="timeline-card"><div class="year">1992</div><div><p>Born in Shiga, Japan</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2016</div><div><p>Kyoto City University of Arts B.A., Department of Sculpture</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2018</div><div><p>Kyoto City University of Arts M.A., Department of Sculpture</p></div></article>'
+      +'</div></section>'
+      +'<div class="symbol-hunt" style="display:block">'
+      +'<div class="s" style="top:5%;left:70%">R</div>'
+      +'<div class="s" style="top:18%;right:8%">G</div>'
+      +'<a class="s" href="#" onclick="goTo(\'works\');return false" style="top:35%;left:85%">E</a>'
+      +'<div class="s" style="top:55%;left:65%">K</div>'
+      +'<div class="s" style="top:70%;right:5%">A</div>'
+      +'<div class="s" style="top:85%;left:75%">T</div>'
+      +'<div class="s" style="top:45%;right:20%">P</div>'
+      +'</div>'
+      +'<p class="footer">&copy; KAZUKI Hata</p>'
+  },
+  works:{
+    title:'Works',
+    nav:null,
+    html:'<header class="page-header"><p class="eyebrow">Works</p><h1>Selected Works</h1></header>'
+      +'<section class="section"><div class="works">'
+      +'<div class="card"><div class="year">2024</div><h3>Folded Horizon</h3><p>Mixed media installation, variable dimensions</p></div>'
+      +'<div class="card"><div class="year">2023</div><h3>Quiet Measure</h3><p>Plaster, steel wire, 180 &times; 60 &times; 45 cm</p></div>'
+      +'<div class="card"><div class="year">2022</div><h3>Threshold Object</h3><p>Wood, glass, found metal, 90 &times; 30 &times; 30 cm</p></div>'
+      +'<div class="card"><div class="year">2021</div><h3>Draft for Rain</h3><p>Paper, ink, aluminium frame, 120 &times; 80 cm</p></div>'
+      +'</div></section>'
+      +'<div class="symbol-hunt" style="display:block">'
+      +'<div class="s" style="top:8%;left:60%">W</div>'
+      +'<div class="s" style="top:22%;right:10%">F</div>'
+      +'<div class="s" style="top:40%;left:70%">X</div>'
+      +'<a class="s" href="#" onclick="goTo(\'statement\');return false" style="top:58%;right:18%">M</a>'
+      +'<div class="s" style="top:72%;left:62%">B</div>'
+      +'<div class="s" style="top:88%;right:8%">L</div>'
+      +'<div class="s" style="top:15%;left:82%">H</div>'
+      +'</div>'
+      +'<p class="footer">&copy; KAZUKI Hata</p>'
+  },
+  statement:{
+    title:'Statement',
+    nav:null,
+    html:'<header class="page-header"><p class="eyebrow">Statement</p><h1>Artist Statement</h1></header>'
+      +'<section class="section"><p style="line-height:2;color:#4f463d;max-width:640px">My practice begins where language hesitates. I work primarily with plaster, wood, and found objects &mdash; materials that carry the residue of prior use. Each piece is an attempt to hold a spatial interval: the distance between a wall and its shadow, or the silence between two footsteps in an empty corridor.</p></section>'
+      +'<div class="symbol-hunt" style="display:block">'
+      +'<div class="s" style="top:10%;left:65%">J</div>'
+      +'<div class="s" style="top:28%;right:12%">V</div>'
+      +'<a class="s" href="#" onclick="goTo(\'contact\');return false" style="top:48%;left:72%">I</a>'
+      +'<div class="s" style="top:62%;right:6%">D</div>'
+      +'<div class="s" style="top:78%;left:68%">Q</div>'
+      +'<div class="s" style="top:38%;left:88%">Y</div>'
+      +'<div class="s" style="top:85%;right:15%">T</div>'
+      +'</div>'
+      +'<p class="footer">&copy; KAZUKI Hata</p>'
+  },
+  contact:{
+    title:'Contact',
+    nav:'contact',
+    html:'<header class="page-header" id="formHeader"><p class="eyebrow">Contact</p><h1>Get in Touch</h1></header>'
+      +'<form class="contact-form" id="contactForm" onsubmit="return false">'
+      +'<div class="form-group"><label for="name">Name</label><input type="text" id="name" placeholder="Your name"></div>'
+      +'<div class="form-group"><label for="email">Email</label><input type="email" id="email" placeholder="you@example.com"></div>'
+      +'<div class="form-group"><label for="subject">Subject</label><input type="text" id="subject" placeholder="Exhibition inquiry, collaboration, etc."></div>'
+      +'<div class="form-group"><label for="message">Message</label><textarea id="message" placeholder="Write your message here..."></textarea></div>'
+      +'<button type="button" class="submit-btn" id="submitBtn">Send Message</button>'
+      +'</form>'
+      +'<div class="symbol-hunt" id="symbolHunt">'
+      +'<div class="s" style="top:8%;left:20%">K</div>'
+      +'<div class="s" style="top:18%;right:25%">P</div>'
+      +'<a class="s" href="#" onclick="goTo(\'press\');return false" style="top:42%;left:38%">S</a>'
+      +'<div class="s" style="top:60%;right:15%">R</div>'
+      +'<div class="s" style="bottom:12%;left:15%">Z</div>'
+      +'<div class="s" style="bottom:22%;right:30%">U</div>'
+      +'<div class="s" style="top:30%;left:70%">A</div>'
+      +'</div>'
+      +'<p class="footer">&copy; KAZUKI Hata</p>',
+    init:function(){
+      document.getElementById('submitBtn').addEventListener('click',function(){
+        document.getElementById('contactForm').style.display='none';
+        document.getElementById('formHeader').style.display='none';
+        document.getElementById('symbolHunt').style.display='block';
+      });
+    }
+  },
+  press:{
+    title:'Press',
+    nav:null,
+    html:'<header class="page-header"><p class="eyebrow">Press</p><h1>Publications</h1></header>'
+      +'<section class="section"><div class="timeline">'
+      +'<article class="timeline-card"><div class="year">2025</div><div><p>&ldquo;Between Measure and Dust&rdquo; &mdash; <em>Art Review Asia</em>, Spring Issue</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2023</div><div><p>&ldquo;Slow Objects&rdquo; catalogue essay by Yuki Tanabe, White Forms Press</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2021</div><div><p>&ldquo;Three Sculptors, Three Rooms&rdquo; &mdash; <em>Bijutsu Techo</em>, No.&thinsp;1092</p></div></article>'
+      +'</div></section>'
+      +'<div class="symbol-hunt" style="display:block">'
+      +'<div class="s" style="top:12%;left:68%">C</div>'
+      +'<div class="s" style="top:25%;right:6%">N</div>'
+      +'<a class="s" href="#" onclick="goTo(\'events\');return false" style="top:45%;left:75%">S</a>'
+      +'<div class="s" style="top:60%;right:20%">W</div>'
+      +'<div class="s" style="top:75%;left:62%">F</div>'
+      +'<div class="s" style="top:88%;right:10%">H</div>'
+      +'<div class="s" style="top:35%;left:58%">B</div>'
+      +'</div>'
+      +'<p class="footer">&copy; KAZUKI Hata</p>'
+  },
+  events:{
+    title:'Events',
+    nav:null,
+    html:'<header class="page-header"><p class="eyebrow">Events</p><h1>Upcoming</h1></header>'
+      +'<section class="section"><div class="timeline">'
+      +'<article class="timeline-card"><div class="year">2026.04</div><div><p>&ldquo;Reluctant Travel&rdquo; &mdash; Kyoto Municipal Museum of Art (until May 18)</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2026.06</div><div><p>Artist talk at Gunma Annex of Contemporary Practice, Maebashi</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2026.09</div><div><p>New commission &mdash; details TBA</p></div></article>'
+      +'</div></section>'
+      +'<div class="symbol-hunt" style="display:block">'
+      +'<div class="s" style="top:10%;left:72%">G</div>'
+      +'<div class="s" style="top:28%;right:8%">L</div>'
+      +'<div class="s" style="top:42%;left:60%">X</div>'
+      +'<a class="s" href="#" onclick="goTo(\'cv\');return false" style="top:58%;right:15%">I</a>'
+      +'<div class="s" style="top:72%;left:66%">D</div>'
+      +'<div class="s" style="top:85%;right:22%">O</div>'
+      +'<div class="s" style="top:20%;left:85%">T</div>'
+      +'</div>'
+      +'<p class="footer">&copy; KAZUKI Hata</p>'
+  },
+  cv:{
+    title:'CV',
+    nav:null,
+    html:'<header class="page-header"><p class="eyebrow">CV</p><h1>Curriculum Vitae</h1></header>'
+      +'<section class="section"><div class="timeline">'
+      +'<article class="timeline-card"><div class="year">Education</div><div><p>Kyoto City University of Arts &mdash; B.A. &amp; M.A. Sculpture</p></div></article>'
+      +'<article class="timeline-card"><div class="year">Teaching</div><div><p>Lecturer, Kyoto City University of Arts (2026&ndash;)</p></div></article>'
+      +'<article class="timeline-card"><div class="year">Awards</div><div><p>Gunma Young Artist Prize (2019), Kyoto Art Fund Grant (2023)</p></div></article>'
+      +'</div></section>'
+      +'<div class="symbol-hunt" style="display:block">'
+      +'<div class="s" style="top:8%;left:62%">A</div>'
+      +'<div class="s" style="top:22%;right:10%">E</div>'
+      +'<div class="s" style="top:38%;left:78%">U</div>'
+      +'<a class="s" href="#" onclick="goTo(\'goal\');return false" style="top:55%;right:18%">O</a>'
+      +'<div class="s" style="top:68%;left:65%">N</div>'
+      +'<div class="s" style="top:82%;right:8%">R</div>'
+      +'<div class="s" style="top:15%;left:88%">P</div>'
+      +'</div>'
+      +'<p class="footer">&copy; KAZUKI Hata</p>'
+  },
+  goal:{
+    title:'KAZUKI Hata',
+    nav:null,
+    html:'<a class="clear-btn" href="javascript:void(0)" id="clearBtn">N</a>'
+      +'<div class="s" style="position:absolute;top:35%;left:70%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">D</div>'
+      +'<div class="s" style="position:absolute;top:65%;right:10%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">V</div>'
+      +'<div class="s" style="position:absolute;top:20%;left:85%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">Q</div>'
+      +'<div class="s" style="position:absolute;top:80%;left:65%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">F</div>',
+    init:function(){
+      document.getElementById('clearBtn').addEventListener('click',function(){
+        if(cleared||gameOver)return;cleared=true;
+        clearTime=performance.now();
+        var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
+        clearLv=Math.min(el/D+waterBonus,1);
+        sessionStorage.setItem('liquidCleared',Date.now());
+        // clear splats + stop tomato
+        sCtx.clearRect(0,0,W,H);
+        blobs=[];
+        // stop BGM
+        bgmFadeIn=false;bgm.pause();
+        // rotate after 10s
+        setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');},10000);
+      });
+    }
+  }
+};
+
+var mainEl=document.getElementById('main');
+
+function goTo(page){
+  if(!pages[page])return;
+  currentPage=page;
+  mainEl.innerHTML=pages[page].html;
+  // update nav highlight
+  document.querySelectorAll('.nav a').forEach(function(a){a.removeAttribute('aria-current');});
+  if(pages[page].nav){
+    var navEl=document.getElementById('nav-'+pages[page].nav);
+    if(navEl)navEl.setAttribute('aria-current','page');
+  }
+  // init liquid timers on first puzzle page
+  if(page!=='start'&&!sessionStorage.getItem('liquidStart')){
+    sessionStorage.setItem('liquidStart',String(Date.now()+10000));
+    sessionStorage.setItem('liquidSeed',String(Math.floor(Math.random()*99999)));
+    rng=mkRng(Number(sessionStorage.getItem('liquidSeed'))||12345);
+    tomatoStart=Number(sessionStorage.getItem('liquidStart'))-7000;
+  }
+  // page-specific init
+  if(pages[page].init)pages[page].init();
+  // scroll to top
+  mainEl.scrollTop=0;
+}
+
+// Nav click handler
+document.querySelectorAll('.nav a[data-page]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    goTo(this.getAttribute('data-page'));
+  });
+});
+
+// ============================================================
+// Session Storage Init
+// ============================================================
 sessionStorage.removeItem('liquidCleared');
 sessionStorage.removeItem('liquidStart');
 sessionStorage.removeItem('liquidGameOver');
+sessionStorage.removeItem('liquidSeed');
+
+// ============================================================
+// Liquid Animation
+// ============================================================
+function mkRng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
+var rng=mkRng(12345);
+
+var D=45,cleared=false,gameOver=false,clearLv=0,clearTime=0;
+var splatCv=document.getElementById('splatCv'),sCtx=splatCv.getContext('2d');
+var waveCv=document.getElementById('waveCv'),wCtx=waveCv.getContext('2d');
+var W,H;
+function resize(){W=window.innerWidth;H=window.innerHeight;splatCv.width=W;splatCv.height=H;waveCv.width=W;waveCv.height=H;}
+resize();window.addEventListener('resize',resize);
+
+function drawSplat(x,y,size){
+  sCtx.save();sCtx.translate(x,y);
+  var pts=[],arms=7+Math.floor(rng()*5);
+  for(var i=0;i<arms;i++){var a=Math.PI*2*i/arms,r=size*(0.5+rng()*0.5);if(rng()<0.3)r*=1.4+rng()*0.8;pts.push({x:Math.cos(a)*r,y:Math.sin(a)*r});}
+  sCtx.globalAlpha=0.4;sCtx.filter='blur('+Math.max(8,size*0.2)+'px)';
+  sCtx.beginPath();sCtx.moveTo(pts[0].x*1.3,pts[0].y*1.3);
+  for(var i=1;i<pts.length;i++){var p=pts[i-1],c=pts[i];sCtx.quadraticCurveTo((p.x*1.3+c.x*1.3)/2+rng()*size*0.3-size*0.15,(p.y*1.3+c.y*1.3)/2+rng()*size*0.3-size*0.15,c.x*1.3,c.y*1.3);}
+  sCtx.closePath();sCtx.fillStyle='#000';sCtx.fill();
+  sCtx.filter='none';sCtx.globalAlpha=0.9;sCtx.beginPath();sCtx.moveTo(pts[0].x,pts[0].y);
+  for(var i=1;i<pts.length;i++){var p=pts[i-1],c=pts[i];sCtx.quadraticCurveTo((p.x+c.x)/2+rng()*size*0.15-size*0.075,(p.y+c.y)/2+rng()*size*0.15-size*0.075,c.x,c.y);}
+  sCtx.closePath();sCtx.fillStyle='#111';sCtx.fill();
+  var nD=3+Math.floor(rng()*5);sCtx.filter='blur(2px)';sCtx.globalAlpha=0.7;
+  for(var i=0;i<nD;i++){var da=rng()*Math.PI*2,dd=size*(0.8+rng()*1.2),dr=3+rng()*6;sCtx.beginPath();sCtx.arc(Math.cos(da)*dd,Math.sin(da)*dd,dr,0,Math.PI*2);sCtx.fill();}
+  sCtx.restore();
+}
+
+var blobs=[],EXPLODE_CHANCE=0.12,spawnTimer=0,spawnInterval=0.8;
+var tomatoStart=Infinity;
+function spawnBlob(){blobs.push({x:rng()*W,y:-30-rng()*60,r:12+rng()*20,vx:(rng()-0.5)*30,vy:40+rng()*80,willExplode:rng()<EXPLODE_CHANCE,explodeY:H*0.2+rng()*H*0.5,alive:true});}
+
+function getWaveY(x,t,lv){var baseY=H*(1-lv);return baseY+Math.sin(x*0.008+t*1.2)*8+Math.sin(x*0.015+t*0.8+1.3)*5+Math.sin(x*0.025+t*2.0+2.7)*3+Math.sin(x*0.004+t*0.5)*12;}
+
+function drawWave(t,lv){
+  wCtx.clearRect(0,0,W,H);if(lv<=0)return;
+  wCtx.beginPath();wCtx.moveTo(0,H+1);
+  for(var x=0;x<=W;x+=3)wCtx.lineTo(x,getWaveY(x,t,lv));
+  wCtx.lineTo(W,H+1);wCtx.closePath();wCtx.fillStyle='#111';wCtx.fill();
+  wCtx.beginPath();for(var x=0;x<=W;x+=3){var wy=getWaveY(x,t,lv);if(x===0)wCtx.moveTo(x,wy);else wCtx.lineTo(x,wy);}
+  wCtx.strokeStyle='rgba(60,60,60,0.6)';wCtx.lineWidth=2;wCtx.stroke();
+  if(!cleared){
+    for(var i=0;i<blobs.length;i++){var b=blobs[i];if(!b.alive)continue;wCtx.beginPath();wCtx.arc(b.x,b.y,b.r,0,Math.PI*2);wCtx.fillStyle='#111';wCtx.fill();wCtx.beginPath();wCtx.arc(b.x-b.r*0.2,b.y-b.r*0.2,b.r*0.35,0,Math.PI*2);wCtx.fillStyle='rgba(80,80,80,0.3)';wCtx.fill();}
+  }
+}
+
+var svgNS='http://www.w3.org/2000/svg',svg=document.createElementNS(svgNS,'svg');
+svg.style.cssText='position:absolute;width:0;height:0';
+svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7"/></filter>';
+document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
+
+// ============================================================
+// BGM
+// ============================================================
+var bgm=new Audio('2026-03-23_stage1.mp3');
+bgm.preload='auto';bgm.loop=true;bgm.volume=0;
+var bgmPlaying=false,bgmFadeIn=false,bgmSlowing=false,bgmSlowStart=0;
+var audioCtx,bgmSource;
+
+function initAudioCtx(){
+  if(audioCtx)return;
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  bgmSource=audioCtx.createMediaElementSource(bgm);
+  bgmSource.connect(audioCtx.destination);
+}
+
+function tryPlayBgm(){
+  if(bgmPlaying)return;
+  initAudioCtx();
+  bgm.play().then(function(){bgmPlaying=true;}).catch(function(){});
+}
+document.addEventListener('click',tryPlayBgm);
+document.addEventListener('touchstart',tryPlayBgm);
+
+// ============================================================
+// Game Over
+// ============================================================
+function triggerGameOver(){
+  if(gameOver||cleared)return;gameOver=true;
+  sessionStorage.setItem('liquidGameOver','1');
+  document.getElementById('gameover-overlay').classList.add('active');
+  setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);
+  // BGM slow down
+  if(bgmPlaying){bgmSlowing=true;bgmSlowStart=performance.now();bgmFadeIn=false;}
+}
+
+document.getElementById('retry-btn').addEventListener('click',function(){
+  sessionStorage.removeItem('liquidStart');
+  sessionStorage.removeItem('liquidCleared');
+  sessionStorage.removeItem('liquidGameOver');
+  sessionStorage.removeItem('liquidSeed');
+  // reset state
+  cleared=false;gameOver=false;clearLv=0;waterBonus=0;
+  blobs=[];
+  sCtx.clearRect(0,0,W,H);
+  tomatoStart=Infinity;
+  bgm.pause();bgm.currentTime=0;bgm.volume=0;bgm.playbackRate=1;
+  bgmPlaying=false;bgmFadeIn=false;bgmSlowing=false;
+  document.getElementById('gameover-overlay').classList.remove('active');
+  document.getElementById('retry-btn').style.display='none';
+  goTo('start');
+});
+
+// ============================================================
+// Main Loop
+// ============================================================
+var lastTime=performance.now(),waterBonus=0;
+function tick(now){
+  var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
+
+  // Only run liquid when game is active (not on start page before timers set)
+  var ls=sessionStorage.getItem('liquidStart');
+  if(ls){
+    var lv;
+    if(cleared){
+      var ct=(now-clearTime)/1000;
+      lv=Math.max(clearLv*(1-ct/3),0);
+    } else {
+      var el=(Date.now()-Number(ls))/1000;
+      lv=Math.min(el/D,1);
+    }
+    var totalLv=cleared?lv:Math.min(lv+waterBonus,1);
+
+    // Game over check (only on goal page)
+    if(!gameOver&&!cleared&&totalLv>=1.0&&currentPage==='goal')triggerGameOver();
+
+    // BGM fade in
+    if(bgmPlaying&&!bgmFadeIn&&!cleared&&!gameOver){
+      var el2=(Date.now()-Number(ls))/1000;
+      if(el2>=0)bgmFadeIn=true;
+    }
+    if(bgmFadeIn&&bgm.volume<1){bgm.volume=Math.min(1,bgm.volume+dt/5);}
+
+    // BGM slow down on game over (6s)
+    if(bgmSlowing&&audioCtx){
+      var elapsed=(now-bgmSlowStart)/1000;
+      bgm.playbackRate=Math.max(0.1,1-elapsed/6*0.9);
+      bgm.volume=Math.max(0,1-elapsed/6);
+      if(elapsed>=6){bgm.pause();bgmSlowing=false;}
+    }
+
+    // Tomato spawning
+    if(!cleared){
+      spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;
+      var tomatoReady=Date.now()>=tomatoStart;
+      if(tomatoReady&&spawnTimer>=spawnInterval&&blobs.length<30){spawnBlob();spawnTimer=0;}
+      for(var i=blobs.length-1;i>=0;i--){var b=blobs[i];if(!b.alive)continue;b.vy+=120*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
+        if(b.willExplode&&b.y>=b.explodeY){drawSplat(b.x,b.y,b.r*2+rng()*15);b.alive=false;continue;}
+        if(b.y+b.r>=getWaveY(b.x,t,totalLv)){waterBonus+=0.001;b.alive=false;continue;}
+        if(b.x<-50||b.x>W+50||b.y>H+50)b.alive=false;}
+      if(blobs.length>40)blobs=blobs.filter(function(b){return b.alive;});
+    }
+    drawWave(t,totalLv);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+// ============================================================
+// Boot
+// ============================================================
+goTo('start');
+requestAnimationFrame(tick);
 </script>
 </body>
 </html>
