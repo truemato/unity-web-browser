@@ -79,9 +79,9 @@ svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation=
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
 // --- BGM ---
-var bgm=new Audio('2026-03-23_stage1.wav');
-bgm.loop=true;bgm.volume=0;
-var bgmStarted=false,bgmFadeIn=false,bgmSlowing=false,bgmSlowStart=0;
+var bgm=new Audio('2026-03-23_stage1.mp3');
+bgm.preload='auto';bgm.loop=true;bgm.volume=0;
+var bgmPlaying=false,bgmFadeIn=false,bgmSlowing=false,bgmSlowStart=0;
 var audioCtx,bgmSource;
 
 function initAudioCtx(){
@@ -90,6 +90,9 @@ function initAudioCtx(){
   bgmSource=audioCtx.createMediaElementSource(bgm);
   bgmSource.connect(audioCtx.destination);
 }
+function tryPlayBgm(){if(bgmPlaying)return;initAudioCtx();bgm.play().then(function(){bgmPlaying=true;}).catch(function(){});}
+document.addEventListener('click',tryPlayBgm);
+document.addEventListener('touchstart',tryPlayBgm);
 
 // --- Game Over ---
 function triggerGameOver(){
@@ -138,10 +141,10 @@ function tick(now){
   var totalLv=cleared?lv:Math.min(lv+waterBonus,1);
   // Game over check
   if(!gameOver&&!cleared&&totalLv>=1.0)triggerGameOver();
-  // BGM: start after 10s silence, fade in over 5s
-  if(!bgmStarted&&!cleared&&!gameOver){
+  // BGM: fade in after liquidStart (10s from first page), over 5s
+  if(bgmPlaying&&!bgmFadeIn&&!cleared&&!gameOver){
     var el2=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
-    if(el2>=0){initAudioCtx();bgm.play().catch(function(){});bgmStarted=true;bgmFadeIn=true;}
+    if(el2>=0)bgmFadeIn=true;
   }
   if(bgmFadeIn&&bgm.volume<1){bgm.volume=Math.min(1,bgm.volume+dt/5);}
   // BGM slow down on game over (6s)

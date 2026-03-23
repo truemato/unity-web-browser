@@ -115,9 +115,12 @@ svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation=
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
 // --- BGM ---
-var bgm=new Audio('2026-03-23_stage1.wav');
-bgm.loop=true;bgm.volume=0;
-var bgmStarted=false,bgmFadeIn=false;
+var bgm=new Audio('2026-03-23_stage1.mp3');
+bgm.preload='auto';bgm.loop=true;bgm.volume=0;
+var bgmPlaying=false,bgmFadeIn=false;
+function tryPlayBgm(){if(bgmPlaying)return;bgm.play().then(function(){bgmPlaying=true;}).catch(function(){});}
+document.addEventListener('click',tryPlayBgm);
+document.addEventListener('touchstart',tryPlayBgm);
 
 var lastTime=performance.now(),waterBonus=0;
 function tick(now){
@@ -126,10 +129,10 @@ function tick(now){
   if(cl){var ct=(Date.now()-Number(cl))/1000;lv=Math.max(1-ct/3,0);}
   else{var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;lv=Math.min(el/D,1);}
   var totalLv=Math.min(lv+waterBonus,1);
-  // BGM: start after 10s silence, fade in over 5s
-  if(!bgmStarted&&!cl){
+  // BGM: fade in after liquidStart (10s from first page), over 5s
+  if(bgmPlaying&&!bgmFadeIn&&!cl){
     var el2=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
-    if(el2>=0){bgm.play().catch(function(){});bgmStarted=true;bgmFadeIn=true;}
+    if(el2>=0)bgmFadeIn=true;
   }
   if(bgmFadeIn&&bgm.volume<1){bgm.volume=Math.min(1,bgm.volume+dt/5);}
   spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;
