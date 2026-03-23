@@ -56,6 +56,7 @@ function drawSplat(x,y,size){
 }
 
 var blobs=[],EXPLODE_CHANCE=0.12,spawnTimer=0,spawnInterval=0.8;
+var tomatoStart=Number(sessionStorage.getItem('liquidStart'))-7000;
 function spawnBlob(){blobs.push({x:rng()*W,y:-30-rng()*60,r:12+rng()*20,vx:(rng()-0.5)*30,vy:40+rng()*80,willExplode:rng()<EXPLODE_CHANCE,explodeY:H*0.2+rng()*H*0.5,alive:true});}
 
 function getWaveY(x,t,lv){var baseY=H*(1-lv);return baseY+Math.sin(x*0.008+t*1.2)*8+Math.sin(x*0.015+t*0.8+1.3)*5+Math.sin(x*0.025+t*2.0+2.7)*3+Math.sin(x*0.004+t*0.5)*12;}
@@ -153,7 +154,8 @@ function tick(now){
   }
   if(!cleared){
     spawnInterval=Math.max(0.4,1.0-lv*0.5);spawnTimer+=dt;
-    if(spawnTimer>=spawnInterval&&blobs.length<30){spawnBlob();spawnTimer=0;}
+    var tomatoReady=Date.now()>=tomatoStart;
+    if(tomatoReady&&spawnTimer>=spawnInterval&&blobs.length<30){spawnBlob();spawnTimer=0;}
     for(var i=blobs.length-1;i>=0;i--){var b=blobs[i];if(!b.alive)continue;b.vy+=120*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
       if(b.willExplode&&b.y>=b.explodeY){drawSplat(b.x,b.y,b.r*2+rng()*15);b.alive=false;continue;}
       if(b.y+b.r>=getWaveY(b.x,t,totalLv)){waterBonus+=0.001;b.alive=false;continue;}
