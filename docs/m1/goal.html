@@ -23,6 +23,7 @@ body.cursor-fade{cursor:none}
 <div id="hint">Hint : Hold</div>
 <div id="gameover">GAME OVER</div><button id="retry-btn">Retry</button>
 <canvas id="fluid"></canvas>
+<canvas id="debug" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99"></canvas>
 <div id="cm">CLEAR!</div>
 <script>
 if(!sessionStorage.getItem('m2Start'))sessionStorage.setItem('m2Start',Date.now());
@@ -64,7 +65,8 @@ function drawQuad(aLoc){gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf);gl.enableVertexAt
 function stepSim(){gl.useProgram(stepProg);gl.bindFramebuffer(gl.FRAMEBUFFER,fboB.fb);gl.viewport(0,0,SIM,SIM);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,fboA.tex);gl.uniform1i(stepTexLoc,0);drawQuad(stepALoc);var tmp=fboA;fboA=fboB;fboB=tmp;}
 function addDrop(cx,cy,radius,strength){gl.useProgram(dropProg);gl.bindFramebuffer(gl.FRAMEBUFFER,fboB.fb);gl.viewport(0,0,SIM,SIM);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,fboA.tex);gl.uniform1i(dropTexLoc,0);gl.uniform2f(dropCenterLoc,cx,cy);gl.uniform1f(dropRadiusLoc,radius);gl.uniform1f(dropStrengthLoc,strength);drawQuad(dropALoc);var tmp=fboA;fboA=fboB;fboB=tmp;}
 
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+var dbgCv=document.getElementById('debug'),dbgCtx=dbgCv.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;dbgCv.width=window.innerWidth;dbgCv.height=window.innerHeight;}
 resize();window.addEventListener('resize',resize);
 
 var mouseX=-1,mouseY=-1,mouseHeld=false,cursorFadeTimer=null;
@@ -86,8 +88,12 @@ function tick(){
   var cl=sessionStorage.getItem('m2Cleared'),prog;
   if(cl){var ct=(Date.now()-Number(cl))/1000;prog=Math.max(1-ct/3,0);}
   else{var el=(Date.now()-Number(sessionStorage.getItem('m2Start')))/1000;prog=Math.min(el/D,1);}
-  var laserY=prog,laserScreenY=prog*window.innerHeight;
+  var laserY=prog,laserScreenY=(1-prog)*window.innerHeight;
   if(!gameOver&&!cleared)checkGameOver(laserScreenY);
+  dbgCtx.clearRect(0,0,dbgCv.width,dbgCv.height);
+  dbgCtx.fillStyle='rgba(255,0,0,0.15)';dbgCtx.fillRect(0,laserScreenY-LASER_HIT_PX,dbgCv.width,LASER_HIT_PX*2);
+  dbgCtx.strokeStyle='rgba(255,0,0,0.6)';dbgCtx.lineWidth=1;dbgCtx.beginPath();dbgCtx.moveTo(0,laserScreenY);dbgCtx.lineTo(dbgCv.width,laserScreenY);dbgCtx.stroke();
+  if(mouseY>=0){dbgCtx.fillStyle='rgba(0,100,255,0.5)';dbgCtx.fillRect(mouseX-3,mouseY-3,6,6);}
 
   var now=Date.now();
   if(now-lastDrop>120+rng()*200){lastDrop=now;addDrop(rng(),laserY,0.015+rng()*0.02,0.1+rng()*0.15);}
