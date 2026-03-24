@@ -11,7 +11,7 @@
     <aside class="sidebar">
       <h1 class="brand">KAZUKI Hata</h1>
       <nav class="nav" aria-label="Primary">
-        <a href="#" data-page="start" id="nav-exhibitions">Exhibitions</a>
+        <a href="#" data-page="exhibitions" id="nav-exhibitions">Exhibitions</a>
         <a href="#" data-page="biography" id="nav-biography">Biography</a>
         <a href="#" data-page="contact" id="nav-contact">Contact</a>
       </nav>
@@ -26,12 +26,13 @@
 
 <script>
 // ============================================================
-// SPA Router & Page Definitions
+// SPA Router — 3 pages, no HTML navigation
 // ============================================================
-var currentPage='start';
+var currentPage='';
+var mainEl=document.getElementById('main');
+
 var pages={
-  start:{
-    title:'Exhibitions',
+  exhibitions:{
     nav:'exhibitions',
     html:'<div class="gallery">'
       +'<div class="gallery-item"><img src="TY01.png" alt="TY01"></div>'
@@ -40,64 +41,42 @@ var pages={
       +'</div>'
   },
   biography:{
-    title:'Biography',
     nav:'biography',
     html:'<header class="page-header"><p class="eyebrow">Biography</p><h1>Chronology</h1></header>'
+
       +'<section class="section"><h2>Profile</h2><div class="timeline">'
       +'<article class="timeline-card"><div class="year">1992</div><div><p>Born in Shiga, Japan</p></div></article>'
-      +'<article class="timeline-card"><div class="year">2016</div><div><p>Kyoto City University of Arts B.A., Department of Sculpture</p></div></article>'
-      +'<article class="timeline-card"><div class="year">2018</div><div><p>Kyoto City University of Arts M.A., Department of Sculpture</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2016</div><div><p>Kyoto City University of Arts B.A., Department of Sculpture, Kyoto, Japan</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2018</div><div><p>Kyoto City University of Arts M.A., Department of Sculpture, Kyoto, Japan</p></div></article>'
+      +'<article class="timeline-card"><div class="year">2026</div><div><p>Teaching at Kyoto City University of Arts</p></div></article>'
       +'</div></section>'
-      +'<div class="symbol-hunt" style="display:block">'
-      +'<div class="s" style="top:5%;left:70%">R</div>'
-      +'<div class="s" style="top:18%;right:8%">G</div>'
-      +'<a class="s" href="#" onclick="goTo(\'works\');return false" style="top:35%;left:85%">E</a>'
-      +'<div class="s" style="top:55%;left:65%">K</div>'
-      +'<div class="s" style="top:70%;right:5%">A</div>'
-      +'<div class="s" style="top:85%;left:75%">T</div>'
-      +'<div class="s" style="top:45%;right:20%">P</div>'
-      +'</div>'
-      +'<p class="footer">&copy; KAZUKI Hata</p>'
-  },
-  works:{
-    title:'Works',
-    nav:null,
-    html:'<header class="page-header"><p class="eyebrow">Works</p><h1>Selected Works</h1></header>'
-      +'<section class="section"><div class="works">'
-      +'<div class="card"><div class="year">2024</div><h3>Folded Horizon</h3><p>Mixed media installation, variable dimensions</p></div>'
-      +'<div class="card"><div class="year">2023</div><h3>Quiet Measure</h3><p>Plaster, steel wire, 180 &times; 60 &times; 45 cm</p></div>'
-      +'<div class="card"><div class="year">2022</div><h3>Threshold Object</h3><p>Wood, glass, found metal, 90 &times; 30 &times; 30 cm</p></div>'
-      +'<div class="card"><div class="year">2021</div><h3>Draft for Rain</h3><p>Paper, ink, aluminium frame, 120 &times; 80 cm</p></div>'
+
+      +'<section class="section"><h2>Solo Exhibitions</h2><div class="timeline">'
+      +'<article class="timeline-card"><div class="year">2016</div><div><ul><li>&ldquo;Silt Court&rdquo;, South Exit Gallery, Takasaki, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2017</div><div><ul><li>&ldquo;Latch Project Room&rdquo;, Shelf West, Maebashi, Gunma, Japan</li><li>&ldquo;Institute for Elastic Distance&rdquo; (with Maren Volk), Rhein Nord Halle, D&uuml;sseldorf, Germany</li><li>&ldquo;Needle Window&rdquo;, White Forms, Isesaki, Gunma, Japan</li><li>&ldquo;Objects That Forgot Their Weight&rdquo;, Blue Fern Space, Kiryu, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2018</div><div><ul><li>&ldquo;Diagram for a Missing Floor&rdquo;, Orbit House, Maebashi, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2020</div><div><ul><li>&ldquo;White Static for Two Corners&rdquo;, Feldweg Raum, D&uuml;sseldorf, Germany</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2021</div><div><ul><li>&ldquo;Paper Monument for Invisible Rain&rdquo;, Nullstelle, D&uuml;sseldorf, Germany</li><li>&ldquo;A Small Theory of Weathered Glass&rdquo;, Passage 17, D&uuml;sseldorf, Germany</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2024</div><div><ul><li>&ldquo;Latch Project Room&rdquo;, Museum of Local Distance, Maebashi, Gunma, Japan</li></ul></div></article>'
       +'</div></section>'
-      +'<div class="symbol-hunt" style="display:block">'
-      +'<div class="s" style="top:8%;left:60%">W</div>'
-      +'<div class="s" style="top:22%;right:10%">F</div>'
-      +'<div class="s" style="top:40%;left:70%">X</div>'
-      +'<a class="s" href="#" onclick="goTo(\'statement\');return false" style="top:58%;right:18%">M</a>'
-      +'<div class="s" style="top:72%;left:62%">B</div>'
-      +'<div class="s" style="top:88%;right:8%">L</div>'
-      +'<div class="s" style="top:15%;left:82%">H</div>'
-      +'</div>'
-      +'<p class="footer">&copy; KAZUKI Hata</p>'
-  },
-  statement:{
-    title:'Statement',
-    nav:null,
-    html:'<header class="page-header"><p class="eyebrow">Statement</p><h1>Artist Statement</h1></header>'
-      +'<section class="section"><p style="line-height:2;color:#4f463d;max-width:640px">My practice begins where language hesitates. I work primarily with plaster, wood, and found objects &mdash; materials that carry the residue of prior use. Each piece is an attempt to hold a spatial interval: the distance between a wall and its shadow, or the silence between two footsteps in an empty corridor.</p></section>'
-      +'<div class="symbol-hunt" style="display:block">'
-      +'<div class="s" style="top:10%;left:65%">J</div>'
-      +'<div class="s" style="top:28%;right:12%">V</div>'
-      +'<a class="s" href="#" onclick="goTo(\'contact\');return false" style="top:48%;left:72%">I</a>'
-      +'<div class="s" style="top:62%;right:6%">D</div>'
-      +'<div class="s" style="top:78%;left:68%">Q</div>'
-      +'<div class="s" style="top:38%;left:88%">Y</div>'
-      +'<div class="s" style="top:85%;right:15%">T</div>'
-      +'</div>'
+
+      +'<section class="section"><h2>Group Exhibitions</h2><div class="timeline">'
+      +'<article class="timeline-card"><div class="year">2016</div><div><ul><li>&ldquo;Open Shelf / Closed Field&rdquo;, Civic Gallery, Takasaki, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2017</div><div><ul><li>&ldquo;Wet Paper, Dry Air&rdquo;, Orbit House, Maebashi, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2018</div><div><ul><li>&ldquo;Small Assembly&rdquo;, South Exit Gallery, Takasaki, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2019</div><div><ul><li>&ldquo;Roadside Grammar&rdquo;, Orbit House, Maebashi, Gunma, Japan</li><li>&ldquo;Uneven Weather&rdquo;, Canal Frame, Maebashi, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2020</div><div><ul><li>&ldquo;Field Notes for an Indoor Use&rdquo;, Museum of Peripheral Forms, Maebashi, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2021</div><div><ul><li>&ldquo;Two or Three Hesitations&rdquo;, East Draft Gallery, Tokyo, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2022</div><div><ul><li>&ldquo;After the Signboard&rdquo;, Split-Level Room, Takasaki, Gunma, Japan</li><li>&ldquo;Northbound / Southbound&rdquo;, Passage Kyoto, Kyoto, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2023</div><div><ul><li>&ldquo;Open Circuit&rdquo;, White Forms, Isesaki, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2024</div><div><ul><li>&ldquo;Minor Riverbed&rdquo;, Museum of Quiet Geometry, Takasaki, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2025</div><div><ul><li>&ldquo;Side Entrance&rdquo;, Kiryu Annex for Contemporary Art, Kiryu, Gunma, Japan</li><li>&ldquo;Public Distance&rdquo;, Museum of Peripheral Light, Isesaki, Gunma, Japan</li></ul></div></article>'
+      +'<article class="timeline-card"><div class="year">2026</div><div><ul><li>&ldquo;Local Rules for Empty Space&rdquo;, Gunma Annex of Contemporary Practice, Maebashi, Gunma, Japan</li><li>&ldquo;Reluctant Travel&rdquo;, Kyoto Municipal Museum of Art, Kyoto, Japan</li></ul></div></article>'
+      +'</div></section>'
+
       +'<p class="footer">&copy; KAZUKI Hata</p>'
   },
   contact:{
-    title:'Contact',
     nav:'contact',
     html:'<header class="page-header" id="formHeader"><p class="eyebrow">Contact</p><h1>Get in Touch</h1></header>'
       +'<form class="contact-form" id="contactForm" onsubmit="return false">'
@@ -107,142 +86,146 @@ var pages={
       +'<div class="form-group"><label for="message">Message</label><textarea id="message" placeholder="Write your message here..."></textarea></div>'
       +'<button type="button" class="submit-btn" id="submitBtn">Send Message</button>'
       +'</form>'
-      +'<div class="symbol-hunt" id="symbolHunt">'
-      +'<div class="s" style="top:8%;left:20%">K</div>'
-      +'<div class="s" style="top:18%;right:25%">P</div>'
-      +'<a class="s" href="#" onclick="goTo(\'press\');return false" style="top:42%;left:38%">S</a>'
-      +'<div class="s" style="top:60%;right:15%">R</div>'
-      +'<div class="s" style="bottom:12%;left:15%">Z</div>'
-      +'<div class="s" style="bottom:22%;right:30%">U</div>'
-      +'<div class="s" style="top:30%;left:70%">A</div>'
-      +'</div>'
+      +'<div class="symbol-hunt" id="puzzleArea"></div>'
       +'<p class="footer">&copy; KAZUKI Hata</p>',
     init:function(){
       document.getElementById('submitBtn').addEventListener('click',function(){
         document.getElementById('contactForm').style.display='none';
         document.getElementById('formHeader').style.display='none';
-        document.getElementById('symbolHunt').style.display='block';
-      });
-    }
-  },
-  press:{
-    title:'Press',
-    nav:null,
-    html:'<header class="page-header"><p class="eyebrow">Press</p><h1>Publications</h1></header>'
-      +'<section class="section"><div class="timeline">'
-      +'<article class="timeline-card"><div class="year">2025</div><div><p>&ldquo;Between Measure and Dust&rdquo; &mdash; <em>Art Review Asia</em>, Spring Issue</p></div></article>'
-      +'<article class="timeline-card"><div class="year">2023</div><div><p>&ldquo;Slow Objects&rdquo; catalogue essay by Yuki Tanabe, White Forms Press</p></div></article>'
-      +'<article class="timeline-card"><div class="year">2021</div><div><p>&ldquo;Three Sculptors, Three Rooms&rdquo; &mdash; <em>Bijutsu Techo</em>, No.&thinsp;1092</p></div></article>'
-      +'</div></section>'
-      +'<div class="symbol-hunt" style="display:block">'
-      +'<div class="s" style="top:12%;left:68%">C</div>'
-      +'<div class="s" style="top:25%;right:6%">N</div>'
-      +'<a class="s" href="#" onclick="goTo(\'events\');return false" style="top:45%;left:75%">S</a>'
-      +'<div class="s" style="top:60%;right:20%">W</div>'
-      +'<div class="s" style="top:75%;left:62%">F</div>'
-      +'<div class="s" style="top:88%;right:10%">H</div>'
-      +'<div class="s" style="top:35%;left:58%">B</div>'
-      +'</div>'
-      +'<p class="footer">&copy; KAZUKI Hata</p>'
-  },
-  events:{
-    title:'Events',
-    nav:null,
-    html:'<header class="page-header"><p class="eyebrow">Events</p><h1>Upcoming</h1></header>'
-      +'<section class="section"><div class="timeline">'
-      +'<article class="timeline-card"><div class="year">2026.04</div><div><p>&ldquo;Reluctant Travel&rdquo; &mdash; Kyoto Municipal Museum of Art (until May 18)</p></div></article>'
-      +'<article class="timeline-card"><div class="year">2026.06</div><div><p>Artist talk at Gunma Annex of Contemporary Practice, Maebashi</p></div></article>'
-      +'<article class="timeline-card"><div class="year">2026.09</div><div><p>New commission &mdash; details TBA</p></div></article>'
-      +'</div></section>'
-      +'<div class="symbol-hunt" style="display:block">'
-      +'<div class="s" style="top:10%;left:72%">G</div>'
-      +'<div class="s" style="top:28%;right:8%">L</div>'
-      +'<div class="s" style="top:42%;left:60%">X</div>'
-      +'<a class="s" href="#" onclick="goTo(\'cv\');return false" style="top:58%;right:15%">I</a>'
-      +'<div class="s" style="top:72%;left:66%">D</div>'
-      +'<div class="s" style="top:85%;right:22%">O</div>'
-      +'<div class="s" style="top:20%;left:85%">T</div>'
-      +'</div>'
-      +'<p class="footer">&copy; KAZUKI Hata</p>'
-  },
-  cv:{
-    title:'CV',
-    nav:null,
-    html:'<header class="page-header"><p class="eyebrow">CV</p><h1>Curriculum Vitae</h1></header>'
-      +'<section class="section"><div class="timeline">'
-      +'<article class="timeline-card"><div class="year">Education</div><div><p>Kyoto City University of Arts &mdash; B.A. &amp; M.A. Sculpture</p></div></article>'
-      +'<article class="timeline-card"><div class="year">Teaching</div><div><p>Lecturer, Kyoto City University of Arts (2026&ndash;)</p></div></article>'
-      +'<article class="timeline-card"><div class="year">Awards</div><div><p>Gunma Young Artist Prize (2019), Kyoto Art Fund Grant (2023)</p></div></article>'
-      +'</div></section>'
-      +'<div class="symbol-hunt" style="display:block">'
-      +'<div class="s" style="top:8%;left:62%">A</div>'
-      +'<div class="s" style="top:22%;right:10%">E</div>'
-      +'<div class="s" style="top:38%;left:78%">U</div>'
-      +'<a class="s" href="#" onclick="goTo(\'goal\');return false" style="top:55%;right:18%">O</a>'
-      +'<div class="s" style="top:68%;left:65%">N</div>'
-      +'<div class="s" style="top:82%;right:8%">R</div>'
-      +'<div class="s" style="top:15%;left:88%">P</div>'
-      +'</div>'
-      +'<p class="footer">&copy; KAZUKI Hata</p>'
-  },
-  goal:{
-    title:'KAZUKI Hata',
-    nav:null,
-    html:'<a class="clear-btn" href="javascript:void(0)" id="clearBtn">N</a>'
-      +'<div class="s" style="position:absolute;top:35%;left:70%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">D</div>'
-      +'<div class="s" style="position:absolute;top:65%;right:10%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">V</div>'
-      +'<div class="s" style="position:absolute;top:20%;left:85%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">Q</div>'
-      +'<div class="s" style="position:absolute;top:80%;left:65%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:var(--ink);background:#f0ece6;border:2px solid var(--line);user-select:none">F</div>',
-    init:function(){
-      document.getElementById('clearBtn').addEventListener('click',function(){
-        if(cleared||gameOver)return;cleared=true;
-        clearTime=performance.now();
-        var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
-        clearLv=Math.min(el/D+waterBonus,1);
-        sessionStorage.setItem('liquidCleared',Date.now());
-        // clear splats + stop tomato
-        sCtx.clearRect(0,0,W,H);
-        blobs=[];
-        // stop BGM
-        bgmFadeIn=false;bgm.pause();
-        // rotate after 10s
-        setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');},10000);
+        showStage(0);
+        // init liquid timers on first puzzle entry
+        if(!sessionStorage.getItem('liquidStart')){
+          sessionStorage.setItem('liquidStart',String(Date.now()+10000));
+          sessionStorage.setItem('liquidSeed',String(Math.floor(Math.random()*99999)));
+          rng=mkRng(Number(sessionStorage.getItem('liquidSeed'))||12345);
+          tomatoStart=Number(sessionStorage.getItem('liquidStart'))-7000;
+        }
       });
     }
   }
 };
 
-var mainEl=document.getElementById('main');
-
 function goTo(page){
   if(!pages[page])return;
   currentPage=page;
   mainEl.innerHTML=pages[page].html;
-  // update nav highlight
   document.querySelectorAll('.nav a').forEach(function(a){a.removeAttribute('aria-current');});
   if(pages[page].nav){
     var navEl=document.getElementById('nav-'+pages[page].nav);
     if(navEl)navEl.setAttribute('aria-current','page');
   }
-  // init liquid timers on first puzzle page
-  if(page!=='start'&&!sessionStorage.getItem('liquidStart')){
-    sessionStorage.setItem('liquidStart',String(Date.now()+10000));
-    sessionStorage.setItem('liquidSeed',String(Math.floor(Math.random()*99999)));
-    rng=mkRng(Number(sessionStorage.getItem('liquidSeed'))||12345);
-    tomatoStart=Number(sessionStorage.getItem('liquidStart'))-7000;
-  }
-  // page-specific init
   if(pages[page].init)pages[page].init();
-  // scroll to top
   mainEl.scrollTop=0;
 }
 
-// Nav click handler
 document.querySelectorAll('.nav a[data-page]').forEach(function(a){
   a.addEventListener('click',function(e){
     e.preventDefault();
     goTo(this.getAttribute('data-page'));
   });
+});
+
+// ============================================================
+// Puzzle — 8 stages inside Contact
+// ============================================================
+var puzzleStages=[
+  {letters:[{ch:'E',ok:true}],
+   pos:[{top:'40%',left:'50%'}]},
+  {letters:[{ch:'W'},{ch:'F'},{ch:'X'},{ch:'M',ok:true}],
+   pos:[{top:'15%',left:'25%'},{top:'30%',right:'18%'},{top:'55%',left:'60%'},{top:'70%',right:'25%'}]},
+  {letters:[{ch:'J'},{ch:'Y'},{ch:'I',ok:true},{ch:'Q'}],
+   pos:[{top:'12%',left:'65%'},{top:'35%',right:'10%'},{top:'55%',left:'30%'},{top:'75%',right:'20%'}]},
+  {letters:[{ch:'S',ok:true},{ch:'A'},{ch:'Z'},{ch:'U'}],
+   pos:[{top:'20%',left:'40%'},{top:'40%',right:'15%'},{top:'60%',left:'20%'},{top:'78%',right:'30%'}]},
+  {letters:[{ch:'C'},{ch:'S',ok:true},{ch:'W'},{ch:'F'}],
+   pos:[{top:'10%',left:'55%'},{top:'35%',right:'22%'},{top:'58%',left:'35%'},{top:'75%',right:'12%'}]},
+  {letters:[{ch:'G'},{ch:'T'},{ch:'X'},{ch:'I',ok:true}],
+   pos:[{top:'18%',left:'30%'},{top:'38%',right:'25%'},{top:'55%',left:'65%'},{top:'72%',right:'18%'}]},
+  {letters:[{ch:'A'},{ch:'P'},{ch:'R'},{ch:'O',ok:true}],
+   pos:[{top:'15%',left:'50%'},{top:'35%',right:'12%'},{top:'58%',left:'22%'},{top:'75%',right:'28%'}]},
+  {letters:[{ch:'Q'},{ch:'N',ok:true},{ch:'D'},{ch:'V'},{ch:'F'}],
+   pos:[{top:'10%',left:'60%'},{top:'30%',left:'40%'},{top:'50%',right:'15%'},{top:'68%',left:'25%'},{top:'80%',right:'22%'}]}
+];
+
+var currentStage=-1;
+
+function showStage(idx){
+  currentStage=idx;
+  var area=document.getElementById('puzzleArea');
+  if(!area)return;
+  area.innerHTML='';
+  var st=puzzleStages[idx];
+  for(var i=0;i<st.letters.length;i++){
+    var lt=st.letters[i],p=st.pos[i];
+    var el;
+    if(lt.ok){
+      el=document.createElement('a');
+      el.href='#';
+      el.className='s';
+      (function(nextIdx){
+        el.addEventListener('click',function(e){
+          e.preventDefault();
+          if(nextIdx<puzzleStages.length) showStage(nextIdx);
+          else onPuzzleClear();
+        });
+      })(idx+1);
+    } else {
+      el=document.createElement('div');
+      el.className='s';
+    }
+    el.textContent=lt.ch;
+    if(idx===7&&lt.ok) el.style.borderRadius='50%';
+    if(p.top) el.style.top=p.top;
+    if(p.left) el.style.left=p.left;
+    if(p.right) el.style.right=p.right;
+    if(p.bottom) el.style.bottom=p.bottom;
+    area.appendChild(el);
+  }
+  area.style.display='block';
+}
+
+// ============================================================
+// Clear & Game Over
+// ============================================================
+var cleared=false,gameOver=false,clearLv=0,clearTime=0;
+
+function onPuzzleClear(){
+  if(cleared||gameOver)return;
+  cleared=true;
+  clearTime=performance.now();
+  var el=(Date.now()-Number(sessionStorage.getItem('liquidStart')))/1000;
+  clearLv=Math.min(el/D+waterBonus,1);
+  sessionStorage.setItem('liquidCleared',String(Date.now()));
+  sCtx.clearRect(0,0,W,H);
+  blobs=[];
+  bgmFadeIn=false;bgm.pause();
+  var area=document.getElementById('puzzleArea');
+  if(area){area.innerHTML='';area.style.display='none';}
+  setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');},10000);
+}
+
+function triggerGameOver(){
+  if(gameOver||cleared)return;gameOver=true;
+  sessionStorage.setItem('liquidGameOver','1');
+  document.getElementById('gameover-overlay').classList.add('active');
+  setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);
+  if(bgmPlaying){bgmSlowing=true;bgmSlowStart=performance.now();bgmFadeIn=false;}
+}
+
+document.getElementById('retry-btn').addEventListener('click',function(){
+  sessionStorage.removeItem('liquidStart');
+  sessionStorage.removeItem('liquidCleared');
+  sessionStorage.removeItem('liquidGameOver');
+  sessionStorage.removeItem('liquidSeed');
+  cleared=false;gameOver=false;clearLv=0;waterBonus=0;
+  blobs=[];currentStage=-1;
+  sCtx.clearRect(0,0,W,H);
+  tomatoStart=Infinity;
+  bgm.pause();bgm.currentTime=0;bgm.volume=0;bgm.playbackRate=1;
+  bgmPlaying=false;bgmFadeIn=false;bgmSlowing=false;
+  document.getElementById('gameover-overlay').classList.remove('active');
+  document.getElementById('retry-btn').style.display='none';
+  goTo('exhibitions');
 });
 
 // ============================================================
@@ -259,7 +242,7 @@ sessionStorage.removeItem('liquidSeed');
 function mkRng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
 var rng=mkRng(12345);
 
-var D=45,cleared=false,gameOver=false,clearLv=0,clearTime=0;
+var D=45;
 var splatCv=document.getElementById('splatCv'),sCtx=splatCv.getContext('2d');
 var waveCv=document.getElementById('waveCv'),wCtx=waveCv.getContext('2d');
 var W,H;
@@ -306,7 +289,7 @@ svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation=
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
 // ============================================================
-// BGM
+// BGM — single Audio instance, persists across page switches
 // ============================================================
 var bgm=new Audio('2026-03-23_stage1.mp3');
 bgm.preload='auto';bgm.loop=true;bgm.volume=0;
@@ -329,42 +312,12 @@ document.addEventListener('click',tryPlayBgm);
 document.addEventListener('touchstart',tryPlayBgm);
 
 // ============================================================
-// Game Over
-// ============================================================
-function triggerGameOver(){
-  if(gameOver||cleared)return;gameOver=true;
-  sessionStorage.setItem('liquidGameOver','1');
-  document.getElementById('gameover-overlay').classList.add('active');
-  setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);
-  // BGM slow down
-  if(bgmPlaying){bgmSlowing=true;bgmSlowStart=performance.now();bgmFadeIn=false;}
-}
-
-document.getElementById('retry-btn').addEventListener('click',function(){
-  sessionStorage.removeItem('liquidStart');
-  sessionStorage.removeItem('liquidCleared');
-  sessionStorage.removeItem('liquidGameOver');
-  sessionStorage.removeItem('liquidSeed');
-  // reset state
-  cleared=false;gameOver=false;clearLv=0;waterBonus=0;
-  blobs=[];
-  sCtx.clearRect(0,0,W,H);
-  tomatoStart=Infinity;
-  bgm.pause();bgm.currentTime=0;bgm.volume=0;bgm.playbackRate=1;
-  bgmPlaying=false;bgmFadeIn=false;bgmSlowing=false;
-  document.getElementById('gameover-overlay').classList.remove('active');
-  document.getElementById('retry-btn').style.display='none';
-  goTo('start');
-});
-
-// ============================================================
 // Main Loop
 // ============================================================
 var lastTime=performance.now(),waterBonus=0;
 function tick(now){
   var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
 
-  // Only run liquid when game is active (not on start page before timers set)
   var ls=sessionStorage.getItem('liquidStart');
   if(ls){
     var lv;
@@ -377,8 +330,8 @@ function tick(now){
     }
     var totalLv=cleared?lv:Math.min(lv+waterBonus,1);
 
-    // Game over check (only on goal page)
-    if(!gameOver&&!cleared&&totalLv>=1.0&&currentPage==='goal')triggerGameOver();
+    // Game over when liquid full (only during puzzle)
+    if(!gameOver&&!cleared&&totalLv>=1.0&&currentStage>=0)triggerGameOver();
 
     // BGM fade in
     if(bgmPlaying&&!bgmFadeIn&&!cleared&&!gameOver){
@@ -387,7 +340,7 @@ function tick(now){
     }
     if(bgmFadeIn&&bgm.volume<1){bgm.volume=Math.min(1,bgm.volume+dt/5);}
 
-    // BGM slow down on game over (6s)
+    // BGM slow down on game over
     if(bgmSlowing&&audioCtx){
       var elapsed=(now-bgmSlowStart)/1000;
       bgm.playbackRate=Math.max(0.1,1-elapsed/6*0.9);
@@ -415,7 +368,7 @@ function tick(now){
 // ============================================================
 // Boot
 // ============================================================
-goTo('start');
+goTo('exhibitions');
 requestAnimationFrame(tick);
 </script>
 </body>
