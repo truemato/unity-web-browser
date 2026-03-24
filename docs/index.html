@@ -93,13 +93,6 @@ var pages={
         document.getElementById('contactForm').style.display='none';
         document.getElementById('formHeader').style.display='none';
         showStage(0);
-        // init liquid timers on first puzzle entry
-        if(!sessionStorage.getItem('liquidStart')){
-          sessionStorage.setItem('liquidStart',String(Date.now()+10000));
-          sessionStorage.setItem('liquidSeed',String(Math.floor(Math.random()*99999)));
-          rng=mkRng(Number(sessionStorage.getItem('liquidSeed'))||12345);
-          tomatoStart=Number(sessionStorage.getItem('liquidStart'))-7000;
-        }
       });
     }
   }
@@ -113,6 +106,13 @@ function goTo(page){
   if(pages[page].nav){
     var navEl=document.getElementById('nav-'+pages[page].nav);
     if(navEl)navEl.setAttribute('aria-current','page');
+  }
+  // init liquid timers when leaving exhibitions
+  if(page!=='exhibitions'&&!sessionStorage.getItem('liquidStart')){
+    sessionStorage.setItem('liquidStart',String(Date.now()+10000));
+    sessionStorage.setItem('liquidSeed',String(Math.floor(Math.random()*99999)));
+    rng=mkRng(Number(sessionStorage.getItem('liquidSeed'))||12345);
+    tomatoStart=Number(sessionStorage.getItem('liquidStart'))-7000;
   }
   if(pages[page].init)pages[page].init();
   mainEl.scrollTop=0;
