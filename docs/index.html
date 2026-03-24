@@ -140,7 +140,7 @@ var puzzleStages=[
   {letters:[{ch:'C'},{ch:'S',ok:true},{ch:'W'},{ch:'F'}],
    pos:[{top:'10%',left:'55%'},{top:'35%',right:'22%'},{top:'58%',left:'35%'},{top:'75%',right:'12%'}]},
   {letters:[{ch:'G'},{ch:'T'},{ch:'X'},{ch:'I',ok:true}],
-   pos:[{top:'18%',left:'30%'},{top:'38%',right:'25%'},{top:'55%',left:'65%'},{top:'72%',right:'18%'}]},
+   pos:[{top:'55%',left:'65%'},{top:'38%',right:'25%'},{top:'72%',right:'18%'},{top:'15%',left:'22%'}]},
   {letters:[{ch:'A'},{ch:'P'},{ch:'R'},{ch:'O',ok:true}],
    pos:[{top:'15%',left:'50%'},{top:'35%',right:'12%'},{top:'58%',left:'22%'},{top:'75%',right:'28%'}]},
   {letters:[{ch:'Q'},{ch:'N',ok:true},{ch:'D'},{ch:'V'},{ch:'F'}],
@@ -224,8 +224,9 @@ document.getElementById('retry-btn').addEventListener('click',function(){
   cleared=false;gameOver=false;clearLv=0;waterBonus=0;
   blobs=[];currentStage=-1;
   sCtx.clearRect(0,0,W,H);
+  wCtx.clearRect(0,0,W,H);
   tomatoStart=Infinity;
-  bgm.pause();bgm.currentTime=0;bgm.volume=0;bgm.playbackRate=1;
+  bgm.pause();bgm.currentTime=0;bgm.volume=0;bgm.playbackRate=1;bgm.loop=true;
   bgmPlaying=false;bgmFadeIn=false;bgmSlowing=false;
   document.getElementById('gameover-overlay').classList.remove('active');
   document.getElementById('retry-btn').style.display='none';
@@ -323,7 +324,12 @@ function tick(now){
   var dt=(now-lastTime)/1000;lastTime=now;var t=now/1000;
 
   var ls=sessionStorage.getItem('liquidStart');
-  if(ls){
+  if(!ls){
+    wCtx.clearRect(0,0,W,H);
+    requestAnimationFrame(tick);
+    return;
+  }
+  {
     var lv;
     if(cleared){
       var ct=(now-clearTime)/1000;
