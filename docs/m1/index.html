@@ -566,11 +566,9 @@ function showPuzzleRound(){
 }
 
 function onPuzzleClear(){
-  if(cleared||gameOver)return;
+  if(cleared)return;
   cleared=true;
   sessionStorage.setItem('m2Cleared',String(Date.now()));
-  var statusEl=document.getElementById('puzzleStatus');
-  if(statusEl) statusEl.textContent='CLEAR!';
   var startT=sessionStorage.getItem('m2Start');
   if(startT){
     var el=(Date.now()-Number(startT))/1000;

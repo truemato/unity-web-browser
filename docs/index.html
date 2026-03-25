@@ -198,7 +198,9 @@ function onPuzzleClear(){
   sessionStorage.setItem('liquidCleared',String(Date.now()));
   sCtx.clearRect(0,0,W,H);
   blobs=[];
-  bgmFadeIn=false;bgm.pause();
+  bgmFadeIn=false;
+  if(bgmBufferSource&&bgmUseBuffer){try{bgmBufferSource.stop();}catch(e){}}
+  bgm.pause();
   var area=document.getElementById('puzzleArea');
   if(area){area.innerHTML='';area.style.display='none';}
   console.log('[M0] Puzzle cleared, sending PAGE_ARRIVED in 4s');
@@ -226,7 +228,10 @@ document.getElementById('retry-btn').addEventListener('click',function(){
   sCtx.clearRect(0,0,W,H);
   wCtx.clearRect(0,0,W,H);
   tomatoStart=Infinity;
-  bgm.pause();bgm.currentTime=0;bgm.volume=0;bgm.playbackRate=1;bgm.loop=true;
+  if(bgmBufferSource&&bgmUseBuffer){try{bgmBufferSource.stop();}catch(e){}}
+  bgmBufferSource=null;bgmUseBuffer=false;
+  bgm.pause();bgm.currentTime=0;bgm.playbackRate=1;
+  if(bgmGain)bgmGain.gain.value=0;
   bgmPlaying=false;bgmFadeIn=false;bgmSlowing=false;
   document.getElementById('gameover-overlay').classList.remove('active');
   document.getElementById('retry-btn').style.display='none';
@@ -294,24 +299,65 @@ svg.innerHTML='<filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation=
 document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 
 // ============================================================
-// BGM — single Audio instance, persists across page switches
+// BGM — Web Audio API gapless loop
 // ============================================================
 var bgm=new Audio('2026-03-23_stage1.mp3');
-bgm.preload='auto';bgm.loop=true;bgm.volume=0;
+bgm.preload='auto';bgm.loop=false;bgm.volume=0;
 var bgmPlaying=false,bgmFadeIn=false,bgmSlowing=false,bgmSlowStart=0;
-var audioCtx,bgmSource;
+var audioCtx,bgmSource,bgmGain,bgmBuffer=null;
+var bgmBufferSource=null,bgmUseBuffer=false;
 
 function initAudioCtx(){
   if(audioCtx)return;
   audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  bgmGain=audioCtx.createGain();
+  bgmGain.gain.value=0;
+  bgmGain.connect(audioCtx.destination);
+  // Also connect the HTML Audio element as fallback
   bgmSource=audioCtx.createMediaElementSource(bgm);
-  bgmSource.connect(audioCtx.destination);
+  bgmSource.connect(bgmGain);
+  // Fetch and decode for gapless buffer loop
+  fetch('2026-03-23_stage1.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
+    return audioCtx.decodeAudioData(buf);
+  }).then(function(decoded){
+    bgmBuffer=decoded;
+  }).catch(function(){});
+}
+
+function startBufferLoop(){
+  if(!bgmBuffer||!audioCtx)return;
+  if(bgmBufferSource){try{bgmBufferSource.stop();}catch(e){}}
+  bgm.pause();
+  bgmBufferSource=audioCtx.createBufferSource();
+  bgmBufferSource.buffer=bgmBuffer;
+  bgmBufferSource.loop=true;
+  bgmBufferSource.connect(bgmGain);
+  bgmBufferSource.start(0);
+  bgmUseBuffer=true;
 }
 
 function tryPlayBgm(){
   if(bgmPlaying)return;
   initAudioCtx();
-  bgm.play().then(function(){bgmPlaying=true;}).catch(function(){});
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  // Try buffer-based gapless loop first
+  if(bgmBuffer){
+    startBufferLoop();
+    bgmPlaying=true;
+  } else {
+    // Fallback: use HTML Audio, switch to buffer when ready
+    bgm.loop=true;
+    bgm.play().then(function(){
+      bgmPlaying=true;
+      // Check periodically if buffer is ready to switch
+      var switchCheck=setInterval(function(){
+        if(bgmBuffer){
+          clearInterval(switchCheck);
+          startBufferLoop();
+        }
+      },500);
+    }).catch(function(){});
+  }
 }
 document.addEventListener('click',tryPlayBgm);
 document.addEventListener('touchstart',tryPlayBgm);
@@ -348,14 +394,24 @@ function tick(now){
       var el2=(Date.now()-Number(ls))/1000;
       if(el2>=0)bgmFadeIn=true;
     }
-    if(bgmFadeIn&&bgm.volume<1){bgm.volume=Math.min(1,bgm.volume+dt/5);}
+    if(bgmFadeIn&&bgmGain){
+      var vol=bgmGain.gain.value;
+      if(vol<1){bgmGain.gain.value=Math.min(1,vol+dt/5);}
+    }
 
     // BGM slow down on game over
     if(bgmSlowing&&audioCtx){
       var elapsed=(now-bgmSlowStart)/1000;
-      bgm.playbackRate=Math.max(0.1,1-elapsed/6*0.9);
-      bgm.volume=Math.max(0,1-elapsed/6);
-      if(elapsed>=6){bgm.pause();bgmSlowing=false;}
+      var rate=Math.max(0.1,1-elapsed/6*0.9);
+      var vol=Math.max(0,1-elapsed/6);
+      if(bgmBufferSource&&bgmUseBuffer){bgmBufferSource.playbackRate.value=rate;}
+      else{bgm.playbackRate=rate;}
+      if(bgmGain)bgmGain.gain.value=vol;
+      if(elapsed>=6){
+        if(bgmBufferSource&&bgmUseBuffer){try{bgmBufferSource.stop();}catch(e){}}
+        else{bgm.pause();}
+        bgmSlowing=false;
+      }
     }
 
     // Tomato spawning
