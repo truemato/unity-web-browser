@@ -201,11 +201,11 @@ function onPuzzleClear(){
   bgmFadeIn=false;bgm.pause();
   var area=document.getElementById('puzzleArea');
   if(area){area.innerHTML='';area.style.display='none';}
-  console.log('[M0] Puzzle cleared, sending PAGE_ARRIVED in 10s');
+  console.log('[M0] Puzzle cleared, sending PAGE_ARRIVED in 4s');
   setTimeout(function(){
     console.log('[M0] Sending PAGE_ARRIVED panelId=0');
     window.parent.postMessage({type:'PAGE_ARRIVED',panelId:0},'*');
-  },10000);
+  },4000);
 }
 
 function triggerGameOver(){

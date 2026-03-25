@@ -1,18 +1,100 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>P2</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aoki Shinya</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{width:100vw;height:100vh;background:#1a1a1a;overflow:hidden;font-family:sans-serif;position:relative}
-.s{position:absolute;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:#0f0;background:#333;border:4px solid #555;box-shadow:2px 2px 6px rgba(0,255,0,.15);text-decoration:none;cursor:default;user-select:none;z-index:50}
-a.s{cursor:pointer}a.s:hover{background:#444;box-shadow:0 0 12px rgba(0,255,0,.3)}
-.n{position:absolute;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:#0f0;background:#2a2a2a;text-decoration:none;cursor:default;z-index:50}
-a.n{cursor:pointer}a.n:hover{background:#3a3a3a;box-shadow:0 0 12px rgba(0,255,0,.3)}
-.ban{position:absolute;top:10%;left:50%;transform:translateX(-50%);background:#0a0;color:#1a1a1a;padding:8px 24px;font-size:22px;font-weight:bold;border-radius:6px;z-index:50}
-.msg{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-size:16px;color:#0a0;z-index:10}
-#cm{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-weight:bold;color:#0f0;z-index:200}
+body{width:100vw;height:100vh;background:#141414;overflow:hidden;font-family:'Helvetica Neue',Arial,sans-serif;color:#ccc;position:relative}
+#content{width:100%;height:100%}
+
+/* Top nav (home only) */
+.topnav{position:absolute;top:0;left:0;width:100%;height:56px;display:flex;align-items:center;justify-content:center;gap:0;z-index:60;background:rgba(20,20,20,0.92);backdrop-filter:blur(6px);border-bottom:1px solid #333}
+.topnav .brand{position:absolute;left:24px;font-size:18px;font-weight:300;letter-spacing:.12em;color:#ddd}
+.topnav a{padding:16px 24px;font-size:13px;letter-spacing:.1em;color:#999;text-decoration:none;text-transform:uppercase;transition:background .2s}
+.topnav a:hover{background:rgba(255,255,255,0.06)}
+.topnav a.active{background:rgba(255,255,255,0.15);color:#fff;font-weight:600}
+
+/* Sidebar layout (non-home pages) */
+.layout{display:flex;width:100%;height:100%}
+.sidebar{width:200px;min-width:200px;background:#1a1a1a;border-right:1px solid #333;padding:24px 0;display:flex;flex-direction:column;z-index:60}
+.sidebar .brand{padding:0 20px 24px;font-size:15px;font-weight:700;letter-spacing:.08em;color:#ddd;border-bottom:1px solid #333;margin-bottom:12px}
+.sidebar a{display:block;padding:10px 20px;font-size:13px;letter-spacing:.08em;color:#888;text-decoration:none;text-transform:uppercase;transition:background .2s}
+.sidebar a:hover{background:rgba(255,255,255,0.06)}
+.sidebar a.active{background:rgba(255,255,255,0.15);color:#fff;font-weight:600}
+
+.main-content{flex:1;overflow-y:auto;padding:40px 48px;position:relative;background:#1e1e1e}
+
+/* Hero (home) */
+.hero{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#1a1a1a 0%,#2a2a2a 25%,#3a3a3a 40%,#8a8a8a 55%,#eee 58%,#fff 62%,#ddd 68%,#555 75%,#1a1a1a 100%)}
+.hero-bg::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,rgba(0,0,0,0.5) 0%,rgba(0,0,0,0.15) 15%,transparent 30%,transparent 70%,rgba(0,0,0,0.15) 85%,rgba(0,0,0,0.5) 100%)}
+.hero-bg::after{content:'';position:absolute;top:44%;left:30%;width:40%;height:18%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),rgba(255,255,255,0.25),rgba(255,255,255,0.15),transparent);filter:blur(12px);border-radius:50%}
+.hero-form{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:500px;height:120px;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.08) 20%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.08) 80%,transparent 100%);border-radius:50%;filter:blur(4px)}
+.hero-form::after{content:'';position:absolute;top:-30px;left:10%;width:80%;height:60px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),rgba(255,255,255,0.12),rgba(255,255,255,0.1),transparent);border-radius:50%;filter:blur(8px);transform:rotate(-3deg)}
+.hero-title{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);text-align:center;z-index:2}
+.hero-title h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:300;letter-spacing:.2em;color:rgba(255,255,255,0.85)}
+.hero-title p{font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:.15em;margin-top:8px}
+
+/* Profile */
+.profile-header{display:flex;gap:40px;margin-bottom:40px;align-items:flex-start}
+.profile-photo{width:200px;height:260px;background:linear-gradient(135deg,#3a3a3a,#2a2a2a,#444);border-radius:2px;flex-shrink:0}
+.profile-info h1{font-size:28px;font-weight:300;letter-spacing:.1em;margin-bottom:4px;color:#eee}
+.profile-info h2{font-size:16px;font-weight:400;color:#888;margin-bottom:20px}
+.profile-info .statement{font-size:14px;line-height:1.9;color:#aaa}
+.history-section{margin-top:48px}
+.history-section h3{font-size:18px;font-weight:600;letter-spacing:.08em;margin-bottom:20px;color:#ddd}
+.history-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.history-img{height:180px;background:linear-gradient(145deg,#333,#222,#2a2a2a);border-radius:2px}
+.history-caption{font-size:12px;color:#888;margin-top:6px}
+
+/* Biography timeline */
+.page-header{margin-bottom:36px}
+.page-header .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:#666;margin-bottom:4px}
+.page-header h1{font-size:28px;font-weight:300;letter-spacing:.1em;color:#ddd}
+.section{margin-bottom:40px}
+.section h2{font-size:16px;font-weight:600;letter-spacing:.08em;margin-bottom:16px;color:#ddd;border-bottom:1px solid #333;padding-bottom:8px}
+.timeline{display:flex;flex-direction:column;gap:0}
+.timeline-card{display:flex;gap:20px;padding:12px 0;border-bottom:1px solid #2a2a2a}
+.timeline-card .year{min-width:50px;font-weight:600;font-size:14px;color:#ccc}
+.timeline-card p,.timeline-card li{font-size:13px;line-height:1.7;color:#999}
+.timeline-card ul{list-style:none;padding:0}
+.timeline-card ul li::before{content:'\2014\00a0';color:#555}
+
+/* Portfolio grid */
+.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.portfolio-item{cursor:pointer;transition:transform .2s}
+.portfolio-item:hover{transform:translateY(-4px)}
+.portfolio-thumb{height:200px;border-radius:2px;position:relative;overflow:hidden}
+.portfolio-thumb .overlay{position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,0.7));color:#ddd;font-size:12px;letter-spacing:.06em}
+
+/* Work page (puzzle) */
+.work-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 80px)}
+.white-cube{background:#222;border:1px solid #444;border-radius:4px;padding:32px;max-width:700px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.puzzle-header{text-align:center;margin-bottom:20px;font-size:14px;color:#888;letter-spacing:.1em}
+.puzzle-area{display:flex;flex-direction:column;align-items:center;gap:20px}
+.puzzle-problem{display:flex;justify-content:center}
+.puzzle-choices{display:flex;gap:16px;justify-content:center}
+.puzzle-choice{cursor:pointer;border:2px solid #444;border-radius:4px;padding:4px;transition:border-color .2s,transform .15s;background:#1a1a1a}
+.puzzle-choice:hover{border-color:#888;transform:scale(1.05)}
+.puzzle-choice.wrong{animation:wrongFlash .4s}
+.puzzle-choice.correct{border-color:#4caf50}
+@keyframes wrongFlash{0%,100%{border-color:#444;background:#1a1a1a}50%{border-color:#f44336;background:rgba(244,67,54,0.15)}}
+.puzzle-status{text-align:center;font-size:18px;font-weight:600;color:#4caf50;letter-spacing:.1em}
+
+/* Contact form */
+.contact-form{max-width:500px}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:6px}
+.form-group input,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #444;border-radius:2px;font-size:14px;background:#2a2a2a;color:#ddd;font-family:inherit}
+.form-group textarea{height:120px;resize:vertical}
+.submit-btn{padding:12px 32px;border:1px solid #888;background:transparent;color:#ccc;font-size:13px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.submit-btn:hover{background:rgba(255,255,255,0.06)}
+
+.footer{margin-top:48px;font-size:11px;color:#555;letter-spacing:.1em}
+
+/* WebGL overlays */
+canvas#fluid{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100}
+canvas#spark{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:101}
 #gameover{display:none;position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);font-size:clamp(2.5rem,6vw,5rem);font-weight:bold;color:transparent;-webkit-text-stroke:2px #fff;text-shadow:0 0 30px rgba(255,255,255,.3);z-index:200;letter-spacing:.15em}
 #retry-btn{display:none;position:fixed;top:58%;left:50%;transform:translateX(-50%);padding:12px 36px;border:1px solid #fff;background:transparent;color:#fff;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;z-index:200}
 #retry-btn:hover{background:rgba(255,255,255,.15)}
-canvas#fluid{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100}
 body.holding{cursor:none}
 body.cursor-fade{cursor:none}
 #hint{display:none;position:fixed;bottom:24px;right:24px;color:#fff;font-size:14px;letter-spacing:.1em;z-index:150;opacity:0;transition:opacity .8s}
@@ -21,80 +103,211 @@ body.cursor-fade{cursor:none}
 
 <div id="content"></div>
 <div id="hint">Hint : Hold</div>
-<div id="gameover">GAME OVER</div><button id="retry-btn">Retry</button>
 <canvas id="fluid"></canvas>
-<canvas id="debug" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99"></canvas>
-<div id="cm">CLEAR!</div>
+<canvas id="spark"></canvas>
+<div id="gameover">GAME OVER</div><button id="retry-btn">Retry</button>
 
 <script>
 // ============================================================
 // SPA Router
 // ============================================================
-var currentPage='start';
+var currentPage='home';
 var hintTimer=null;
-var pagesM1={
-  start:{
-    html:'<div class="msg">Find the right symbol.</div>'
-        +'<a class="s" href="#" onclick="goTo(\'p2\');return false" style="top:55%;left:50%;transform:translate(-50%,-50%)">k</a>',
-    laserMode:'none'
+var contentEl=document.getElementById('content');
+
+// Navigation HTML builders
+function topNav(activePage){
+  return '<div class="topnav">'
+    +'<span class="brand">Aoki Shinya</span>'
+    +'<a href="#" onclick="goTo(\'home\');return false" class="'+(activePage==='home'?'active':'')+'">Home</a>'
+    +'<a href="#" onclick="goTo(\'profile\');return false" class="'+(activePage==='profile'?'active':'')+'">Profile</a>'
+    +'<a href="#" onclick="goTo(\'biography\');return false" class="'+(activePage==='biography'?'active':'')+'">Biography</a>'
+    +'<a href="#" onclick="goTo(\'portfolio\');return false" class="'+(activePage==='portfolio'?'active':'')+'">Portfolio</a>'
+    +'<a href="#" onclick="goTo(\'contact\');return false" class="'+(activePage==='contact'?'active':'')+'">Contact</a>'
+    +'</div>';
+}
+
+function sidebarLayout(activePage, mainHTML){
+  return '<div class="layout">'
+    +'<div class="sidebar">'
+    +'<div class="brand">Aoki Shinya</div>'
+    +'<a href="#" onclick="goTo(\'home\');return false" class="'+(activePage==='home'?'active':'')+'">Home</a>'
+    +'<a href="#" onclick="goTo(\'profile\');return false" class="'+(activePage==='profile'?'active':'')+'">Profile</a>'
+    +'<a href="#" onclick="goTo(\'biography\');return false" class="'+(activePage==='biography'?'active':'')+'">Biography</a>'
+    +'<a href="#" onclick="goTo(\'portfolio\');return false" class="'+(activePage==='portfolio'?'active':'')+'">Portfolio</a>'
+    +'<a href="#" onclick="goTo(\'contact\');return false" class="'+(activePage==='contact'?'active':'')+'">Contact</a>'
+    +'</div>'
+    +'<div class="main-content">'+mainHTML+'</div>'
+    +'</div>';
+}
+
+// Page definitions
+var pagesData={
+  home:{
+    laser:false,
+    render:function(){
+      return topNav('home')
+        +'<div class="hero">'
+        +'<div class="hero-bg"></div>'
+        +'<div class="hero-form"></div>'
+        +'<div class="hero-title"><h1>AOKI SHINYA</h1><p>Sculpture &amp; Installation</p></div>'
+        +'</div>';
+    }
   },
-  p2:{
-    html:'<div class="s" style="top:40%;left:35%">i</div>'
-        +'<a class="s" href="#" onclick="goTo(\'p3\');return false" style="top:25%;right:12%">m</a>'
-        +'<div class="s" style="bottom:18%;left:30%">l</div>'
-        +'<div class="s" style="bottom:12%;right:10%">k</div>',
-    laserMode:'oscillate',
-    hintDelay:10000
+  profile:{
+    laser:true,
+    render:function(){
+      return sidebarLayout('profile',
+        '<div class="profile-header">'
+        +'<div class="profile-photo"></div>'
+        +'<div class="profile-info">'
+        +'<h1>\u9752\u6728\u771f\u4e5f</h1>'
+        +'<h2>Aoki Shinya / \u5f6b\u523b\u30fb\u30a4\u30f3\u30b9\u30bf\u30ec\u30fc\u30b7\u30e7\u30f3</h2>'
+        +'<div class="statement">'
+        +'<p>\u300c\u900f\u904e\u3059\u308b\u3082\u306e\u300d\u3092\u4e3b\u984c\u306b\u5236\u4f5c\u6d3b\u52d5\u3092\u5c55\u958b\u3059\u308b\u3002</p>'
+        +'<br><p>\u7a7a\u9593\u306b\u5b58\u5728\u3059\u308b\u898b\u3048\u306a\u3044\u5883\u754c\u2014\u2014\u5149\u3068\u5f71\u306e\u3042\u3044\u3060\u3001\u7269\u8cea\u3068\u975e\u7269\u8cea\u306e\u3042\u3044\u3060\u3001\u5185\u3068\u5916\u306e\u3042\u3044\u3060\u2014\u2014\u305d\u308c\u3089\u306e\u95a2\u4fc2\u6027\u3092\u63a2\u308a\u3001\u30ac\u30e9\u30b9\u3001\u6a39\u8102\u3001\u6c34\u3068\u3044\u3063\u305f\u900f\u904e\u6027\u306e\u3042\u308b\u7d20\u6750\u3092\u7528\u3044\u3066\u3001\u300c\u305d\u3053\u306b\u3042\u308b\u304c\u898b\u3048\u306a\u3044\u3082\u306e\u300d\u306e\u304b\u305f\u3061\u3092\u4e0e\u3048\u308b\u3053\u3068\u3092\u8a66\u307f\u3066\u3044\u308b\u3002</p>'
+        +'<br><p>\u4f5c\u54c1\u306f\u89b3\u5bdf\u8005\u306e\u77e5\u899a\u3092\u901a\u3058\u3066\u521d\u3081\u3066\u5b8c\u6210\u3059\u308b\u3002\u305d\u306e\u610f\u5473\u3067\u3001\u79c1\u306f\u7a7a\u9593\u305d\u306e\u3082\u306e\u3092\u5f6b\u523b\u3057\u3066\u3044\u308b\u306e\u304b\u3082\u3057\u308c\u306a\u3044\u3002</p>'
+        +'</div></div></div>'
+        +'<div class="history-section">'
+        +'<h3>Exhibition History</h3>'
+        +'<div class="history-grid">'
+        +'<div><div class="history-img" style="background:linear-gradient(145deg,#c8c0b8,#a8a0a0,#d0c8c0)"></div><div class="history-caption">\u300cGlass Sentence for an Empty Room\u300d Passage 17 2024</div></div>'
+        +'<div><div class="history-img" style="background:linear-gradient(145deg,#b0b8c0,#909898,#c0c8c0)"></div><div class="history-caption">\u300cPerimeter of Condensed Air\u300d Orbit House 2022</div></div>'
+        +'<div><div class="history-img" style="background:linear-gradient(145deg,#d0d0c8,#b8b0a8,#c8c8c0)"></div><div class="history-caption">\u300cIndex for a Transparent Wall\u300d Feldweg Raum 2020</div></div>'
+        +'</div></div>'
+      );
+    }
   },
-  p3:{
-    html:'<div class="s" style="top:30%;left:12%">d</div>'
-        +'<div class="s" style="top:25%;right:8%">m</div>'
-        +'<div class="n" style="top:50%;left:50%;transform:translate(-50%,-50%)">4</div>'
-        +'<a class="s" href="#" onclick="goTo(\'goal\');return false" style="bottom:12%;left:12%">e</a>'
-        +'<div class="s" style="bottom:12%;right:8%">o</div>',
-    laserMode:'oscillate',
-    hintDelay:3000
+  biography:{
+    laser:true,
+    render:function(){
+      return sidebarLayout('biography',
+        '<header class="page-header"><p class="eyebrow">Biography</p><h1>Chronology</h1></header>'
+
+        +'<section class="section"><h2>Education</h2><div class="timeline">'
+        +'<article class="timeline-card"><div class="year">1990</div><div><p>Born in Maebashi, Gunma, Japan</p></div></article>'
+        +'<article class="timeline-card"><div class="year">2014</div><div><p>Gunma Prefectural College of Art B.A., Department of Sculpture</p></div></article>'
+        +'<article class="timeline-card"><div class="year">2016</div><div><p>Gunma Prefectural College of Art M.F.A., Department of Sculpture</p></div></article>'
+        +'</div></section>'
+
+        +'<section class="section"><h2>Solo Exhibitions</h2><div class="timeline">'
+        +'<article class="timeline-card"><div class="year">2016</div><div><ul><li>\u201cResin Court\u201d, South Exit Gallery, Takasaki, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2017</div><div><ul><li>\u201cVolume Without Shadow\u201d, Shelf West, Maebashi, Gunma, Japan</li><li>\u201cIndex for a Transparent Wall\u201d (with Maren Volk), Rhein Nord Halle, D\u00fcsseldorf, Germany</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2018</div><div><ul><li>\u201cPerimeter of Condensed Air\u201d, Orbit House, Maebashi, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2020</div><div><ul><li>\u201cGlass Sentence for an Empty Room\u201d, Feldweg Raum, D\u00fcsseldorf, Germany</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2021</div><div><ul><li>\u201cLight Cast by a Missing Object\u201d, Nullstelle, D\u00fcsseldorf, Germany</li><li>\u201cA Thin Theory of Held Air\u201d, Passage 17, D\u00fcsseldorf, Germany</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2024</div><div><ul><li>\u201cLiminal Form\u201d, Museum of Local Distance, Maebashi, Gunma, Japan</li></ul></div></article>'
+        +'</div></section>'
+
+        +'<section class="section"><h2>Group Exhibitions</h2><div class="timeline">'
+        +'<article class="timeline-card"><div class="year">2016</div><div><ul><li>\u201cOpen Shelf / Closed Field\u201d, Civic Gallery, Takasaki, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2017</div><div><ul><li>\u201cWet Paper, Dry Air\u201d, Orbit House, Maebashi, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2019</div><div><ul><li>\u201cRoadside Grammar\u201d, Orbit House, Maebashi, Gunma, Japan</li><li>\u201cUneven Weather\u201d, Canal Frame, Maebashi, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2020</div><div><ul><li>\u201cField Notes for an Indoor Use\u201d, Museum of Peripheral Forms, Maebashi, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2022</div><div><ul><li>\u201cAfter the Signboard\u201d, Split-Level Room, Takasaki, Gunma, Japan</li><li>\u201cNorthbound / Southbound\u201d, Passage Kyoto, Kyoto, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2024</div><div><ul><li>\u201cMinor Riverbed\u201d, Museum of Quiet Geometry, Takasaki, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2025</div><div><ul><li>\u201cSide Entrance\u201d, Kiryu Annex for Contemporary Art, Kiryu, Gunma, Japan</li><li>\u201cPublic Distance\u201d, Museum of Peripheral Light, Isesaki, Gunma, Japan</li></ul></div></article>'
+        +'<article class="timeline-card"><div class="year">2026</div><div><ul><li>\u201cLocal Rules for Empty Space\u201d, Gunma Annex of Contemporary Practice, Maebashi, Gunma, Japan</li></ul></div></article>'
+        +'</div></section>'
+
+        +'<p class="footer">&copy; Aoki Shinya</p>'
+      );
+    }
   },
-  goal:{
-    html:'<div class="ban">\u30CA\u30C4\u30E1</div>'
-        +'<a class="n" href="javascript:void(0)" id="clearBtn" style="top:28%;left:50%;transform:translateX(-50%)">5</a>'
-        +'<div class="s" style="top:55%;right:15%">e</div>',
-    laserMode:'linear',
-    hintDelay:3000
+  portfolio:{
+    laser:true,
+    render:function(){
+      var works=[
+        {id:'w1',title:'Liminal Form',year:'2024',grad:'linear-gradient(135deg,#c8bfb8,#a8a0a8,#d0c8d0)'},
+        {id:'w2',title:'Glass Sentence for an Empty Room',year:'2020',grad:'linear-gradient(135deg,#b0b8c8,#8898a8,#c0c8d0)'},
+        {id:'w3',title:'A Thin Theory of Held Air',year:'2021',grad:'linear-gradient(135deg,#d0d0c0,#b0a8a0,#c8c0b8)'},
+        {id:'w4',title:'Perimeter of Condensed Air',year:'2018',grad:'linear-gradient(135deg,#c0c8c0,#a0a8a0,#b8c0b8)'},
+        {id:'w5',title:'Volume Without Shadow',year:'2017',grad:'linear-gradient(135deg,#c8c0c8,#a8a0b0,#d0c8d8)'},
+        {id:'w6',title:'Light Cast by a Missing Object',year:'2021',grad:'linear-gradient(135deg,#d0c8b8,#b8b0a0,#c8c0b0)'}
+      ];
+      var grid='';
+      for(var i=0;i<works.length;i++){
+        var w=works[i];
+        grid+='<div class="portfolio-item" onclick="goTo(\'work\');return false">'
+          +'<div class="portfolio-thumb" style="background:'+w.grad+'">'
+          +'<div class="overlay">'+w.title+' / '+w.year+'</div>'
+          +'</div></div>';
+      }
+      return sidebarLayout('portfolio',
+        '<header class="page-header"><p class="eyebrow">Portfolio</p><h1>Selected Works</h1></header>'
+        +'<div class="portfolio-grid">'+grid+'</div>'
+        +'<p class="footer">&copy; Aoki Shinya</p>'
+      );
+    }
+  },
+  work:{
+    laser:true,
+    render:function(){
+      return sidebarLayout('portfolio',
+        '<div class="work-page">'
+        +'<div class="white-cube">'
+        +'<div class="puzzle-header">Round <span id="puzzleRound">1</span> / 5</div>'
+        +'<div class="puzzle-area">'
+        +'<div style="display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap">'
+        +'<canvas id="puzzleFull" width="160" height="160" style="border:1px solid #333;border-radius:4px;background:#1a1a1a"></canvas>'
+        +'<div style="font-size:24px;color:#555">\u2192</div>'
+        +'<canvas id="puzzleProblem" width="200" height="200" style="border:1px solid #333;border-radius:4px;background:#1a1a1a"></canvas>'
+        +'</div>'
+        +'<div class="puzzle-choices" id="puzzleChoices"></div>'
+        +'</div>'
+        +'<div class="puzzle-status" id="puzzleStatus"></div>'
+        +'</div></div>'
+      );
+    },
+    init:function(){
+      initPuzzle();
+    }
+  },
+  contact:{
+    laser:true,
+    render:function(){
+      return sidebarLayout('contact',
+        '<header class="page-header"><p class="eyebrow">\u304a\u554f\u3044\u5408\u308f\u305b</p><h1>\u3054\u9023\u7d61</h1></header>'
+        +'<form class="contact-form" onsubmit="return false">'
+        +'<div class="form-group"><label for="c-name">\u304a\u540d\u524d</label><input type="text" id="c-name" placeholder="\u6c0f\u540d\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044"></div>'
+        +'<div class="form-group"><label for="c-email">\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9</label><input type="email" id="c-email" placeholder="example@mail.com"></div>'
+        +'<div class="form-group"><label for="c-subject">\u4ef6\u540d</label><input type="text" id="c-subject" placeholder="\u5c55\u89a7\u4f1a\u306b\u3064\u3044\u3066\u3001\u30b3\u30e9\u30dc\u30ec\u30fc\u30b7\u30e7\u30f3\u306a\u3069"></div>'
+        +'<div class="form-group"><label for="c-message">\u30e1\u30c3\u30bb\u30fc\u30b8</label><textarea id="c-message" placeholder="\u304a\u554f\u3044\u5408\u308f\u305b\u5185\u5bb9\u3092\u3054\u8a18\u5165\u304f\u3060\u3055\u3044\u2026"></textarea></div>'
+        +'<button type="button" class="submit-btn">\u9001\u4fe1\u3059\u308b</button>'
+        +'</form>'
+        +'<p class="footer">&copy; Aoki Shinya</p>'
+      );
+    }
   }
 };
 
-var contentEl=document.getElementById('content');
-
 function goTo(page){
-  if(!pagesM1[page])return;
+  if(!pagesData[page])return;
+  if(gameOver&&page!=='home')return;
   currentPage=page;
-  contentEl.innerHTML=pagesM1[page].html;
+  contentEl.innerHTML=pagesData[page].render();
 
-  // Hide hint, reset timer
   var hintEl=document.getElementById('hint');
   hintEl.style.display='none';hintEl.classList.remove('show');
   if(hintTimer)clearTimeout(hintTimer);hintTimer=null;
 
-  if(page==='start'){
+  if(page==='home'){
     sessionStorage.removeItem('m2Cleared');
-    sessionStorage.removeItem('m2GameOver');
     sessionStorage.setItem('m2Seed',String(Date.now()%100000));
     sessionStorage.removeItem('m2Start');
     rng=mkRng(Number(sessionStorage.getItem('m2Seed'))||12345);
-    gameOver=false;cleared=false;
+    gameOver=false;cleared=false;sparks=[];flashStart=0;
+    puzzleRound=0;
+    resetFBO();
     document.getElementById('gameover').style.display='none';
     document.getElementById('retry-btn').style.display='none';
-    document.getElementById('cm').style.display='none';
   }
 
-  if(page==='p2'&&!sessionStorage.getItem('m2Start')){
+  if(page!=='home'&&!sessionStorage.getItem('m2Start')){
     sessionStorage.setItem('m2Start',String(Date.now()+10000));
-    sessionStorage.removeItem('m2GameOver');
   }
 
-  // Show hint after delay
-  var delay=pagesM1[page].hintDelay;
+  var delay=pagesData[page].hintDelay;
   if(delay){
     hintTimer=setTimeout(function(){
       var h=document.getElementById('hint');
@@ -103,14 +316,268 @@ function goTo(page){
     },delay);
   }
 
-  // Goal clear button
-  if(page==='goal'){
-    document.getElementById('clearBtn').addEventListener('click',function(){
-      if(cleared||gameOver)return;cleared=true;
-      sessionStorage.setItem('m2Cleared',String(Date.now()));
-      setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');},7000);
-    });
+  if(pagesData[page].init) pagesData[page].init();
+}
+
+// ============================================================
+// 3D Shape Puzzle System
+// ============================================================
+var PUZZLE_TOTAL=5;
+var puzzleRound=0;
+
+// Shape definitions: arrays of [x,y,z] voxel coords
+var shapeLibrary=[
+  // L-shape
+  [[0,0,0],[1,0,0],[2,0,0],[2,1,0]],
+  // T-shape
+  [[0,0,0],[1,0,0],[2,0,0],[1,1,0]],
+  // Stairs
+  [[0,0,0],[1,0,0],[1,1,0],[2,1,0]],
+  // Bridge
+  [[0,0,0],[2,0,0],[0,1,0],[1,1,0],[2,1,0]],
+  // Corner 3D
+  [[0,0,0],[1,0,0],[0,1,0],[0,0,1]],
+  // Tower
+  [[0,0,0],[0,1,0],[0,2,0],[1,0,0]],
+  // Z-shape
+  [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[2,2,0]],
+  // U-shape
+  [[0,0,0],[0,1,0],[0,2,0],[1,0,0],[1,2,0]],
+  // Plus
+  [[1,0,0],[0,1,0],[1,1,0],[2,1,0],[1,2,0]],
+  // 3D L
+  [[0,0,0],[1,0,0],[1,1,0],[1,1,1]],
+  // 3D stairs
+  [[0,0,0],[1,0,0],[1,0,1],[2,0,1]],
+  // Block corner
+  [[0,0,0],[1,0,0],[0,1,0],[0,0,1],[1,0,1]],
+  // Diagonal bridge
+  [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[2,1,1]],
+  // S shape 3D
+  [[0,0,0],[0,1,0],[1,1,0],[1,2,0],[1,2,1]]
+];
+
+function cellKey(c){return c[0]+','+c[1]+','+c[2];}
+function cellsEqual(a,b){
+  if(a.length!==b.length)return false;
+  var sa=a.map(cellKey).sort().join('|');
+  var sb=b.map(cellKey).sort().join('|');
+  return sa===sb;
+}
+
+function splitShape(cells,puzzleRng){
+  // Create a random cut plane
+  var maxX=0,maxY=0,maxZ=0;
+  for(var i=0;i<cells.length;i++){
+    if(cells[i][0]>maxX)maxX=cells[i][0];
+    if(cells[i][1]>maxY)maxY=cells[i][1];
+    if(cells[i][2]>maxZ)maxZ=cells[i][2];
   }
+  // Try multiple random cuts until we get a valid split
+  for(var attempt=0;attempt<50;attempt++){
+    var axis=Math.floor(puzzleRng()*3);
+    var maxVal=[maxX,maxY,maxZ][axis];
+    var cutAt=puzzleRng()*(maxVal+1);
+    var pieceA=[],pieceB=[];
+    for(var i=0;i<cells.length;i++){
+      if(cells[i][axis]<cutAt) pieceA.push(cells[i].slice());
+      else pieceB.push(cells[i].slice());
+    }
+    if(pieceA.length>=1&&pieceB.length>=1) return {a:pieceA,b:pieceB};
+  }
+  // Fallback: split in half
+  var half=Math.floor(cells.length/2);
+  return {a:cells.slice(0,half),b:cells.slice(half)};
+}
+
+function getWrongPieceFromOtherShape(correctCells,correctShapeIdx,puzzleRng){
+  // Pick a different shape, split it, return one piece as a wrong answer
+  for(var attempt=0;attempt<20;attempt++){
+    var idx=Math.floor(puzzleRng()*shapeLibrary.length);
+    if(idx===correctShapeIdx) continue;
+    var otherShape=shapeLibrary[idx];
+    var otherSplit=splitShape(otherShape,puzzleRng);
+    var candidate=puzzleRng()<0.5?otherSplit.a:otherSplit.b;
+    if(!cellsEqual(candidate,correctCells)) return candidate;
+  }
+  // Fallback: mirror the correct piece
+  var mirrored=[];
+  for(var i=0;i<correctCells.length;i++){
+    mirrored.push([correctCells[i][0],correctCells[i][1]+2,correctCells[i][2]]);
+  }
+  return mirrored;
+}
+
+// Isometric drawing
+function isoProject(x,y,z,scale){
+  var px=((x-z)*0.866)*scale;
+  var py=((x+z)*0.5-y)*scale;
+  return {x:px,y:py};
+}
+
+function drawVoxel(ctx,x,y,z,scale,ox,oy){
+  var s=scale;
+  // 8 corners of the voxel cube
+  var corners=[
+    [x,y,z],[x+1,y,z],[x+1,y,z+1],[x,y,z+1],
+    [x,y+1,z],[x+1,y+1,z],[x+1,y+1,z+1],[x,y+1,z+1]
+  ];
+  var p=[];
+  for(var i=0;i<8;i++){
+    var ip=isoProject(corners[i][0],corners[i][1],corners[i][2],s);
+    p.push({x:ip.x+ox,y:ip.y+oy});
+  }
+  // Top face (4,5,6,7)
+  ctx.beginPath();
+  ctx.moveTo(p[4].x,p[4].y);ctx.lineTo(p[5].x,p[5].y);
+  ctx.lineTo(p[6].x,p[6].y);ctx.lineTo(p[7].x,p[7].y);ctx.closePath();
+  ctx.fillStyle='rgba(120,120,255,0.35)';ctx.fill();
+  ctx.strokeStyle='rgba(40,40,80,0.7)';ctx.lineWidth=1;ctx.stroke();
+
+  // Left face (0,3,7,4)
+  ctx.beginPath();
+  ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[3].x,p[3].y);
+  ctx.lineTo(p[7].x,p[7].y);ctx.lineTo(p[4].x,p[4].y);ctx.closePath();
+  ctx.fillStyle='rgba(100,100,220,0.4)';ctx.fill();
+  ctx.strokeStyle='rgba(40,40,80,0.7)';ctx.lineWidth=1;ctx.stroke();
+
+  // Right face (1,5,6,2) -> actually front-right (0,1,5,4)
+  ctx.beginPath();
+  ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[1].x,p[1].y);
+  ctx.lineTo(p[5].x,p[5].y);ctx.lineTo(p[4].x,p[4].y);ctx.closePath();
+  ctx.fillStyle='rgba(80,80,200,0.45)';ctx.fill();
+  ctx.strokeStyle='rgba(40,40,80,0.7)';ctx.lineWidth=1;ctx.stroke();
+}
+
+function renderShape(canvas,cells,scale){
+  var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!cells||cells.length===0)return;
+
+  // Sort cells for painter's algorithm: draw back to front
+  var sorted=cells.slice().sort(function(a,b){
+    var sa=a[0]+a[2]-a[1];
+    var sb=b[0]+b[2]-b[1];
+    return sa-sb;
+  });
+
+  // Center offset
+  var minPx=Infinity,maxPx=-Infinity,minPy=Infinity,maxPy=-Infinity;
+  for(var i=0;i<cells.length;i++){
+    var c=cells[i];
+    // Check all 8 corners
+    for(var dx=0;dx<=1;dx++)for(var dy=0;dy<=1;dy++)for(var dz=0;dz<=1;dz++){
+      var ip=isoProject(c[0]+dx,c[1]+dy,c[2]+dz,scale);
+      if(ip.x<minPx)minPx=ip.x;if(ip.x>maxPx)maxPx=ip.x;
+      if(ip.y<minPy)minPy=ip.y;if(ip.y>maxPy)maxPy=ip.y;
+    }
+  }
+  var ox=canvas.width/2-(minPx+maxPx)/2;
+  var oy=canvas.height/2-(minPy+maxPy)/2;
+
+  for(var i=0;i<sorted.length;i++){
+    drawVoxel(ctx,sorted[i][0],sorted[i][1],sorted[i][2],scale,ox,oy);
+  }
+}
+
+var currentPuzzleCorrectIdx=-1;
+
+function initPuzzle(){
+  puzzleRound=0;
+  showPuzzleRound();
+}
+
+function showPuzzleRound(){
+  var roundEl=document.getElementById('puzzleRound');
+  var choicesEl=document.getElementById('puzzleChoices');
+  var statusEl=document.getElementById('puzzleStatus');
+  var problemCv=document.getElementById('puzzleProblem');
+  var fullCv=document.getElementById('puzzleFull');
+  if(!roundEl||!choicesEl||!problemCv||!fullCv)return;
+
+  roundEl.textContent=String(puzzleRound+1);
+  statusEl.textContent='';
+  choicesEl.innerHTML='';
+
+  // Pick a random shape
+  var puzzleRng=mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*7919);
+  var shapeIdx=Math.floor(puzzleRng()*shapeLibrary.length);
+  var shape=shapeLibrary[shapeIdx];
+
+  // Split into two pieces
+  var split=splitShape(shape,puzzleRng);
+
+  // Render full shape (reference)
+  renderShape(fullCv,shape,22);
+
+  // Render remaining piece A
+  renderShape(problemCv,split.a,30);
+
+  // Generate choices: 1 correct (piece B) + 2 wrong from OTHER shapes
+  var correct=split.b;
+  var wrong1=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*13+37));
+  var wrong2=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*31+71));
+
+  // Ensure all 3 choices are distinct
+  if(cellsEqual(wrong1,wrong2)){
+    wrong2=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*97+13));
+  }
+  if(cellsEqual(wrong1,correct)){
+    wrong1=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*53+7));
+  }
+
+  var choices=[
+    {cells:correct,isCorrect:true},
+    {cells:wrong1,isCorrect:false},
+    {cells:wrong2,isCorrect:false}
+  ];
+
+  // Shuffle
+  for(var i=choices.length-1;i>0;i--){
+    var j=Math.floor(puzzleRng()*(i+1));
+    var tmp=choices[i];choices[i]=choices[j];choices[j]=tmp;
+  }
+
+  for(var i=0;i<choices.length;i++){
+    var cv=document.createElement('canvas');
+    cv.width=140;cv.height=140;
+    cv.className='puzzle-choice';
+    cv.style.background='#1a1a1a';
+    renderShape(cv,choices[i].cells,22);
+    (function(choice,cvEl){
+      cvEl.addEventListener('click',function(){
+        if(cleared||gameOver)return;
+        if(choice.isCorrect){
+          cvEl.classList.add('correct');
+          puzzleRound++;
+          if(puzzleRound>=PUZZLE_TOTAL){
+            onPuzzleClear();
+          } else {
+            setTimeout(showPuzzleRound,600);
+          }
+        } else {
+          cvEl.classList.add('wrong');
+          setTimeout(function(){cvEl.classList.remove('wrong');},400);
+        }
+      });
+    })(choices[i],cv);
+    choicesEl.appendChild(cv);
+  }
+}
+
+function onPuzzleClear(){
+  if(cleared||gameOver)return;
+  cleared=true;
+  sessionStorage.setItem('m2Cleared',String(Date.now()));
+  var statusEl=document.getElementById('puzzleStatus');
+  if(statusEl) statusEl.textContent='CLEAR!';
+  var startT=sessionStorage.getItem('m2Start');
+  if(startT){
+    var el=(Date.now()-Number(startT))/1000;
+    if(el>0){var ls=getLaserState(el);spawnSparks(ls.pos,ls.dir);}
+  }
+  resetFBO();
+  setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');},4000);
 }
 
 // ============================================================
@@ -119,6 +586,7 @@ function goTo(page){
 function mkRng(s){return function(){s|=0;s=s+0x6D2B79F5|0;var t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
 var rng=mkRng(12345);
 var D=45,cleared=false,gameOver=false;
+var PHASE_DUR=D/2;
 
 var canvas=document.getElementById('fluid');
 var gl=canvas.getContext('webgl',{alpha:true,premultipliedAlpha:false});
@@ -137,8 +605,32 @@ var stepProg=createProgram(QUAD_VS,stepFS);var stepTexLoc=gl.getUniformLocation(
 var dropFS='precision highp float;varying vec2 v;uniform sampler2D u_tex;uniform vec2 u_center;uniform float u_radius;uniform float u_strength;void main(){vec2 d=texture2D(u_tex,v).rg;float dist=length(v-u_center)/u_radius;if(dist<1.0){float drop=0.5-cos(dist*3.14159265)*0.5;d.r+=(1.0-drop)*u_strength;}gl_FragColor=vec4(d,0,1);}';
 var dropProg=createProgram(QUAD_VS,dropFS);var dropTexLoc=gl.getUniformLocation(dropProg,'u_tex');var dropCenterLoc=gl.getUniformLocation(dropProg,'u_center');var dropRadiusLoc=gl.getUniformLocation(dropProg,'u_radius');var dropStrengthLoc=gl.getUniformLocation(dropProg,'u_strength');var dropALoc=gl.getAttribLocation(dropProg,'a');
 
-var renderFS='precision highp float;varying vec2 v;uniform sampler2D u_tex;uniform float u_laserY;uniform float u_pxH;void main(){float h=texture2D(u_tex,v).r;float dx=1.0/'+SIM+'.0;float hL=texture2D(u_tex,v+vec2(-dx,0)).r;float hR=texture2D(u_tex,v+vec2(dx,0)).r;float normalX=(hL-hR)*8.0;float distY=v.y-(u_laserY+normalX*0.01);float absDist=abs(distY);float coreHalf=2.5*u_pxH;float core=1.0-smoothstep(0.0,coreHalf,absDist);float glowHalf=40.0*u_pxH;float glow=(1.0-smoothstep(0.0,glowHalf,absDist))*0.35;float rippleBand=60.0*u_pxH;float rippleVis=(1.0-smoothstep(0.0,rippleBand,absDist));float ripple=h*rippleVis*2.0;float intensity=core+glow+abs(ripple)*0.3;if(intensity<0.005)discard;float g=clamp(core*1.2+glow*0.8+ripple*0.4,0.0,1.0);float r=core*0.15+abs(ripple)*0.1;float b=core*0.05;float alpha=clamp(core*0.95+glow+abs(ripple)*0.2,0.0,1.0);gl_FragColor=vec4(r,g,b,alpha);}';
-var renderProg=createProgram(QUAD_VS,renderFS);var renderTexLoc=gl.getUniformLocation(renderProg,'u_tex');var renderLaserYLoc=gl.getUniformLocation(renderProg,'u_laserY');var renderPxHLoc=gl.getUniformLocation(renderProg,'u_pxH');var renderALoc=gl.getAttribLocation(renderProg,'a');
+var renderFS='precision highp float;varying vec2 v;uniform sampler2D u_tex;uniform float u_pos;uniform float u_dir;uniform float u_pxSize;uniform float u_flash;void main(){'
++'float h=texture2D(u_tex,v).r;float dx=1.0/'+SIM+'.0;'
++'float hL=texture2D(u_tex,v+vec2(-dx,0)).r;float hR=texture2D(u_tex,v+vec2(dx,0)).r;'
++'float hU=texture2D(u_tex,v+vec2(0,dx)).r;float hD=texture2D(u_tex,v+vec2(0,-dx)).r;'
++'float isV=step(0.5,u_dir);'
++'float normalPerp=mix((hL-hR)*8.0,(hD-hU)*8.0,isV);'
++'float distFromLaser=mix(v.y-(u_pos+normalPerp*0.01),v.x-(u_pos+normalPerp*0.01),isV);'
++'float absDist=abs(distFromLaser);'
++'float coreHalf=mix(2.5,4.0,u_flash)*u_pxSize;float core=1.0-smoothstep(0.0,coreHalf,absDist);'
++'float glowHalf=mix(40.0,70.0,u_flash)*u_pxSize;float glow=(1.0-smoothstep(0.0,glowHalf,absDist))*mix(0.35,0.6,u_flash);'
++'float rippleBand=60.0*u_pxSize;float rippleVis=1.0-smoothstep(0.0,rippleBand,absDist);'
++'float ripple=h*rippleVis*2.0;'
++'float intensity=core+glow+abs(ripple)*0.3;if(intensity<0.005)discard;'
++'float gBase=clamp(core*1.2+glow*0.8+ripple*0.4,0.0,1.0);'
++'float rBase=core*0.15+abs(ripple)*0.1;float bBase=core*0.05;'
++'float w=clamp(core+glow*0.8,0.0,1.0)*u_flash;'
++'float r=mix(rBase,1.0,w);float g=mix(gBase,1.0,w);float b=mix(bBase,1.0,w);'
++'float alpha=clamp(core*0.95+glow+abs(ripple)*0.2,0.0,1.0);'
++'gl_FragColor=vec4(r,g,b,alpha);}';
+var renderProg=createProgram(QUAD_VS,renderFS);
+var renderTexLoc=gl.getUniformLocation(renderProg,'u_tex');
+var renderPosLoc=gl.getUniformLocation(renderProg,'u_pos');
+var renderDirLoc=gl.getUniformLocation(renderProg,'u_dir');
+var renderPxSizeLoc=gl.getUniformLocation(renderProg,'u_pxSize');
+var renderFlashLoc=gl.getUniformLocation(renderProg,'u_flash');
+var renderALoc=gl.getAttribLocation(renderProg,'a');
 
 var ext=gl.getExtension('OES_texture_float');gl.getExtension('OES_texture_float_linear');
 function createFBO(){var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,SIM,SIM,0,gl.RGBA,gl.FLOAT,null);var fb=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);return{tex:tex,fb:fb};}
@@ -148,88 +640,173 @@ function drawQuad(aLoc){gl.bindBuffer(gl.ARRAY_BUFFER,quadBuf);gl.enableVertexAt
 function stepSim(){gl.useProgram(stepProg);gl.bindFramebuffer(gl.FRAMEBUFFER,fboB.fb);gl.viewport(0,0,SIM,SIM);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,fboA.tex);gl.uniform1i(stepTexLoc,0);drawQuad(stepALoc);var tmp=fboA;fboA=fboB;fboB=tmp;}
 function addDrop(cx,cy,radius,strength){gl.useProgram(dropProg);gl.bindFramebuffer(gl.FRAMEBUFFER,fboB.fb);gl.viewport(0,0,SIM,SIM);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,fboA.tex);gl.uniform1i(dropTexLoc,0);gl.uniform2f(dropCenterLoc,cx,cy);gl.uniform1f(dropRadiusLoc,radius);gl.uniform1f(dropStrengthLoc,strength);drawQuad(dropALoc);var tmp=fboA;fboA=fboB;fboB=tmp;}
 
-var dbgCv=document.getElementById('debug'),dbgCtx=dbgCv.getContext('2d');
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;dbgCv.width=window.innerWidth;dbgCv.height=window.innerHeight;}
+function resetFBO(){
+  gl.bindFramebuffer(gl.FRAMEBUFFER,fboA.fb);gl.viewport(0,0,SIM,SIM);
+  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,fboB.fb);gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+}
+
+var sparkCv=document.getElementById('spark'),sparkCtx=sparkCv.getContext('2d');
+function resize(){
+  var w=window.innerWidth,h=window.innerHeight;
+  canvas.width=w;canvas.height=h;
+  sparkCv.width=w;sparkCv.height=h;
+}
 resize();window.addEventListener('resize',resize);
 
 // ============================================================
-// Mouse & Game Over
+// Laser Phase System
+// ============================================================
+function getLaserState(el){
+  var totalTime=el%(PHASE_DUR*4);
+  var phaseIdx=Math.floor(totalTime/PHASE_DUR);
+  var p=(totalTime%PHASE_DUR)/PHASE_DUR;
+  var dir,pos;
+  switch(phaseIdx){
+    case 0:dir=0;pos=p;break;
+    case 1:dir=1;pos=1-p;break;
+    case 2:dir=1;pos=p;break;
+    case 3:dir=0;pos=1-p;break;
+  }
+  return{dir:dir,pos:pos,phaseIdx:phaseIdx};
+}
+
+// ============================================================
+// Mouse & Hit Detection
 // ============================================================
 var mouseX=-1,mouseY=-1,mouseHeld=false,cursorFadeTimer=null;
 document.addEventListener('mousemove',function(e){mouseX=e.clientX;mouseY=e.clientY;});
 document.addEventListener('mousedown',function(){mouseHeld=true;if(cursorFadeTimer)clearTimeout(cursorFadeTimer);cursorFadeTimer=setTimeout(function(){document.body.classList.add('holding');},100);document.body.classList.add('cursor-fade');});
 document.addEventListener('mouseup',function(){mouseHeld=false;if(cursorFadeTimer){clearTimeout(cursorFadeTimer);cursorFadeTimer=null;}document.body.classList.remove('holding','cursor-fade');});
 
-var LASER_HIT_PX=30;
-function triggerGameOver(){
-  if(gameOver||cleared)return;
-  gameOver=true;sessionStorage.setItem('m2GameOver','1');
+var LASER_HIT_PX=10;
+var flashStart=0;
+
+function triggerFlash(){
+  if(gameOver)return;
+  flashStart=performance.now();
+  gameOver=true;
   document.getElementById('gameover').style.display='block';
   setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);
 }
-document.getElementById('retry-btn').addEventListener('click',function(){goTo('start');});
 
-function checkGameOver(laserScreenY){
+function checkHit(laserDir,laserPos){
   if(gameOver||cleared)return;
-  if(!mouseHeld&&mouseY>=0){if(Math.abs(mouseY-laserScreenY)<LASER_HIT_PX)triggerGameOver();}
+  if(mouseHeld||mouseX<0)return;
+  if(laserDir===0){
+    var screenY=(1-laserPos)*window.innerHeight;
+    if(Math.abs(mouseY-screenY)<LASER_HIT_PX)triggerFlash();
+  }else{
+    var screenX=laserPos*window.innerWidth;
+    if(Math.abs(mouseX-screenX)<LASER_HIT_PX)triggerFlash();
+  }
+}
+
+document.getElementById('retry-btn').addEventListener('click',function(){goTo('home');});
+
+// ============================================================
+// Spark System
+// ============================================================
+var sparks=[];
+function spawnSparks(laserPos,laserDir){
+  var W=window.innerWidth,H=window.innerHeight;
+  for(var i=0;i<200;i++){
+    var x,y;
+    if(laserDir===0){x=Math.random()*W;y=(1-laserPos)*H;}
+    else{x=laserPos*W;y=Math.random()*H;}
+    var angle=Math.random()*Math.PI*2;
+    var speed=150+Math.random()*500;
+    sparks.push({
+      x:x,y:y,
+      vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,
+      life:1.0,decay:0.4+Math.random()*0.8,
+      size:1+Math.random()*3,bright:Math.random()
+    });
+  }
+}
+
+var lastSparkTime=0;
+function updateSparks(now){
+  if(sparks.length===0){sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);return;}
+  var dt=lastSparkTime?Math.min((now-lastSparkTime)/1000,0.05):0.016;
+  lastSparkTime=now;
+  sparkCtx.clearRect(0,0,sparkCv.width,sparkCv.height);
+  for(var i=sparks.length-1;i>=0;i--){
+    var s=sparks[i];
+    s.x+=s.vx*dt;s.y+=s.vy*dt;
+    s.vy+=300*dt;
+    s.vx*=0.98;s.vy*=0.98;
+    s.life-=s.decay*dt;
+    if(s.life<=0){sparks.splice(i,1);continue;}
+    sparkCtx.globalAlpha=s.life;
+    sparkCtx.fillStyle=s.bright>0.7?'#fff':'#0f0';
+    sparkCtx.fillRect(s.x-s.size/2,s.y-s.size/2,s.size,s.size);
+    sparkCtx.globalAlpha=s.life*0.4;
+    sparkCtx.beginPath();
+    sparkCtx.moveTo(s.x,s.y);
+    sparkCtx.lineTo(s.x-s.vx*dt*4,s.y-s.vy*dt*4);
+    sparkCtx.strokeStyle=s.bright>0.5?'rgba(255,255,255,0.6)':'rgba(0,255,0,0.6)';
+    sparkCtx.lineWidth=s.size*0.6;
+    sparkCtx.stroke();
+  }
+  sparkCtx.globalAlpha=1;
 }
 
 // ============================================================
 // Main Loop
 // ============================================================
 var lastDrop=0;
-function tick(){
-  var mode=pagesM1[currentPage]?pagesM1[currentPage].laserMode:'none';
-  var prog=0;
+function tick(now){
+  var active=pagesData[currentPage]&&pagesData[currentPage].laser;
+  var ts=now||performance.now();
 
-  if(mode!=='none'){
-    var cl=sessionStorage.getItem('m2Cleared');
-    if(cl){
-      var ct=(Date.now()-Number(cl))/1000;prog=Math.max(1-ct/3,0);
-    } else {
-      var startT=sessionStorage.getItem('m2Start');
-      if(startT){
-        var el=(Date.now()-Number(startT))/1000;
-        if(mode==='oscillate'){var halfP=D/2;var phase=(el/halfP)%2;prog=phase<=1?phase:2-phase;}
-        else if(mode==='linear'){prog=Math.min(el/D,1);}
+  if(active&&!cleared){
+    var startT=sessionStorage.getItem('m2Start');
+    if(startT){
+      var el=(Date.now()-Number(startT))/1000;
+      if(el>0){
+        var ls=getLaserState(el);
+
+        checkHit(ls.dir,ls.pos);
+
+        var flash=flashStart?Math.max(0,1-(ts-flashStart)/1000):0;
+
+        var dropNow=Date.now();
+        if(dropNow-lastDrop>120+rng()*200){
+          lastDrop=dropNow;
+          if(ls.dir===0)addDrop(rng(),ls.pos,0.015+rng()*0.02,0.1+rng()*0.15);
+          else addDrop(ls.pos,rng(),0.015+rng()*0.02,0.1+rng()*0.15);
+        }
+        stepSim();stepSim();
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,canvas.width,canvas.height);
+        gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(renderProg);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,fboA.tex);
+        gl.uniform1i(renderTexLoc,0);
+        gl.uniform1f(renderPosLoc,ls.pos);
+        gl.uniform1f(renderDirLoc,ls.dir);
+        gl.uniform1f(renderPxSizeLoc,ls.dir===0?1.0/canvas.height:1.0/canvas.width);
+        gl.uniform1f(renderFlashLoc,flash);
+        drawQuad(renderALoc);gl.disable(gl.BLEND);
+      }else{
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,canvas.width,canvas.height);
+        gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
       }
     }
-
-    var laserY=prog,laserScreenY=(1-prog)*window.innerHeight;
-    if(!gameOver&&!cleared)checkGameOver(laserScreenY);
-
-    // DEBUG: draw hit zone band (red) and cursor position (blue)
-    dbgCtx.clearRect(0,0,dbgCv.width,dbgCv.height);
-    dbgCtx.fillStyle='rgba(255,0,0,0.15)';
-    dbgCtx.fillRect(0,laserScreenY-LASER_HIT_PX,dbgCv.width,LASER_HIT_PX*2);
-    dbgCtx.strokeStyle='rgba(255,0,0,0.6)';dbgCtx.lineWidth=1;
-    dbgCtx.beginPath();dbgCtx.moveTo(0,laserScreenY);dbgCtx.lineTo(dbgCv.width,laserScreenY);dbgCtx.stroke();
-    if(mouseY>=0){
-      dbgCtx.fillStyle='rgba(0,100,255,0.5)';
-      dbgCtx.fillRect(mouseX-3,mouseY-3,6,6);
-    }
-
-    var now=Date.now();
-    if(now-lastDrop>120+rng()*200){lastDrop=now;addDrop(rng(),laserY,0.015+rng()*0.02,0.1+rng()*0.15);}
-    stepSim();stepSim();
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,canvas.width,canvas.height);
-    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-    gl.useProgram(renderProg);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,fboA.tex);
-    gl.uniform1i(renderTexLoc,0);gl.uniform1f(renderLaserYLoc,laserY);gl.uniform1f(renderPxHLoc,1.0/canvas.height);
-    drawQuad(renderALoc);gl.disable(gl.BLEND);
-  } else {
+  }else{
     gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,canvas.width,canvas.height);
     gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
   }
 
+  updateSparks(now||performance.now());
   requestAnimationFrame(tick);
 }
 
 // ============================================================
 // Boot
 // ============================================================
-goTo('start');
+goTo('home');
 tick();
 </script></body></html>
