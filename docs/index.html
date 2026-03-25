@@ -301,7 +301,7 @@ document.body.appendChild(svg);waveCv.style.filter='url(#goo)';
 // ============================================================
 // BGM — Web Audio API gapless loop
 // ============================================================
-var bgm=new Audio('2026-03-23_stage1.mp3');
+var bgm=new Audio('stage1.mp3');
 bgm.preload='auto';bgm.loop=false;bgm.volume=0;
 var bgmPlaying=false,bgmFadeIn=false,bgmSlowing=false,bgmSlowStart=0;
 var audioCtx,bgmSource,bgmGain,bgmBuffer=null;
@@ -317,7 +317,7 @@ function initAudioCtx(){
   bgmSource=audioCtx.createMediaElementSource(bgm);
   bgmSource.connect(bgmGain);
   // Fetch and decode for gapless buffer loop
-  fetch('2026-03-23_stage1.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
+  fetch('stage1.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
     return audioCtx.decodeAudioData(buf);
   }).then(function(decoded){
     bgmBuffer=decoded;
@@ -387,7 +387,7 @@ function tick(now){
     var totalLv=cleared?lv:Math.min(lv+waterBonus,1);
 
     // Game over when liquid full (only during puzzle)
-    if(!gameOver&&!cleared&&totalLv>=1.0&&currentStage>=0)triggerGameOver();
+    if(!gameOver&&!cleared&&totalLv>=1.0)triggerGameOver();
 
     // BGM fade in
     if(bgmPlaying&&!bgmFadeIn&&!cleared&&!gameOver){
