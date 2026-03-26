@@ -5,9 +5,10 @@ body{width:100vw;height:100vh;background:#141414;overflow:hidden;font-family:'He
 #content{width:100%;height:100%}
 
 /* Top nav (home only) */
-.topnav{position:absolute;top:0;left:0;width:100%;height:56px;display:flex;align-items:center;justify-content:center;gap:0;z-index:60;background:rgba(20,20,20,0.92);backdrop-filter:blur(6px);border-bottom:1px solid #333}
-.topnav .brand{position:absolute;left:24px;font-size:18px;font-weight:300;letter-spacing:.12em;color:#ddd}
-.topnav a{padding:16px 24px;font-size:13px;letter-spacing:.1em;color:#999;text-decoration:none;text-transform:uppercase;transition:background .2s}
+.topnav{position:absolute;top:0;left:0;width:100%;height:56px;display:flex;align-items:center;z-index:60;background:rgba(20,20,20,0.92);backdrop-filter:blur(6px);border-bottom:1px solid #333}
+.topnav .brand{display:none}
+.topnav .nav-links{display:flex;margin-left:auto;margin-right:24px}
+.topnav a{padding:16px 20px;font-size:13px;letter-spacing:.1em;color:#999;text-decoration:none;text-transform:uppercase;transition:background .2s}
 .topnav a:hover{background:rgba(255,255,255,0.06)}
 .topnav a.active{background:rgba(255,255,255,0.15);color:#fff;font-weight:600}
 
@@ -22,11 +23,11 @@ body{width:100vw;height:100vh;background:#141414;overflow:hidden;font-family:'He
 .main-content{flex:1;overflow-y:auto;padding:40px 48px;position:relative;background:#1e1e1e}
 
 /* Hero (home) */
-.hero{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-.hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:url('hero.png') center/cover no-repeat}
-.hero-title{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);text-align:center;z-index:2}
-.hero-title h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:300;letter-spacing:.2em;color:rgba(255,255,255,0.85)}
-.hero-title p{font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:.15em;margin-top:8px}
+.hero{position:relative;width:100%;height:calc(100% - 56px);margin-top:56px;overflow:hidden;padding:0 10%}
+.hero-title{padding:20px 0 12px;text-align:left;z-index:2}
+.hero-title h1{font-size:clamp(1.4rem,2.5vw,2rem);font-weight:300;letter-spacing:.15em;color:#eee}
+.hero-title p{font-size:12px;color:#666;letter-spacing:.12em;margin-top:2px}
+.hero-img{width:100%;height:calc(100% - 80px);object-fit:cover;object-position:center;border-radius:2px;display:block}
 
 /* Profile */
 .profile-header{display:flex;gap:40px;margin-bottom:40px;align-items:flex-start}
@@ -114,13 +115,13 @@ var contentEl=document.getElementById('content');
 // Navigation HTML builders
 function topNav(activePage){
   return '<div class="topnav">'
-    +'<span class="brand">Aoki Shinya</span>'
+    +'<div class="nav-links">'
     +'<a href="#" onclick="goTo(\'home\');return false" class="'+(activePage==='home'?'active':'')+'">Home</a>'
     +'<a href="#" onclick="goTo(\'profile\');return false" class="'+(activePage==='profile'?'active':'')+'">Profile</a>'
     +'<a href="#" onclick="goTo(\'biography\');return false" class="'+(activePage==='biography'?'active':'')+'">Biography</a>'
     +'<a href="#" onclick="goTo(\'portfolio\');return false" class="'+(activePage==='portfolio'?'active':'')+'">Portfolio</a>'
     +'<a href="#" onclick="goTo(\'contact\');return false" class="'+(activePage==='contact'?'active':'')+'">Contact</a>'
-    +'</div>';
+    +'</div></div>';
 }
 
 function sidebarLayout(activePage, mainHTML){
@@ -144,8 +145,8 @@ var pagesData={
     render:function(){
       return topNav('home')
         +'<div class="hero">'
-        +'<div class="hero-bg"></div>'
-        +'<div class="hero-title"><h1>AOKI SHINYA</h1><p>Sculpture &amp; Installation</p></div>'
+        +'<div class="hero-title"><h1>Aoki Shinya</h1><p>Sculpture &amp; Installation</p></div>'
+        +'<img class="hero-img" src="hero.png" alt="Aoki Shinya">'
         +'</div>';
     }
   },
