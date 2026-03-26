@@ -461,7 +461,7 @@ var puzzleBank=[
     var cor=genPrism(4,1,2);
     var w1=genPrism(6,0.8,2);
     var w2=genPyramid(4,1.2,2);
-    return{pieceA:pA,pieceB:pB,correct:cor,wrong1:w1,wrong2:w2};
+    return{pieceA:pA,pieceB:pB,correct:cor,wrong1:w1,wrong2:w2,fixedOrder:[w1,cor,w2]};
   })()
 ];
 
@@ -492,13 +492,20 @@ function showPuzzleRound(){
   drawSolidOnCanvas(cvB,pz.pieceB.v,pz.pieceB.f,'rgba(220,100,70,0.5)','rgba(120,40,20,0.8)',30);
 
   // Build choices
-  var choices=[
-    {shape:pz.correct,isCorrect:true},
-    {shape:pz.wrong1,isCorrect:false},
-    {shape:pz.wrong2,isCorrect:false}
-  ];
-  // Shuffle choices
-  for(var i=choices.length-1;i>0;i--){var j=Math.floor(puzzleRng()*(i+1));var t=choices[i];choices[i]=choices[j];choices[j]=t;}
+  var choices;
+  if(pz.fixedOrder){
+    choices=[];
+    for(var i=0;i<pz.fixedOrder.length;i++){
+      choices.push({shape:pz.fixedOrder[i],isCorrect:pz.fixedOrder[i]===pz.correct});
+    }
+  }else{
+    choices=[
+      {shape:pz.correct,isCorrect:true},
+      {shape:pz.wrong1,isCorrect:false},
+      {shape:pz.wrong2,isCorrect:false}
+    ];
+    for(var i=choices.length-1;i>0;i--){var j=Math.floor(puzzleRng()*(i+1));var t=choices[i];choices[i]=choices[j];choices[j]=t;}
+  }
 
   for(var i=0;i<choices.length;i++){
     var cv=document.createElement('canvas');
