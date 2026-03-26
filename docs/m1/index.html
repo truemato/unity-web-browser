@@ -23,11 +23,7 @@ body{width:100vw;height:100vh;background:#141414;overflow:hidden;font-family:'He
 
 /* Hero (home) */
 .hero{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-.hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#1a1a1a 0%,#2a2a2a 25%,#3a3a3a 40%,#8a8a8a 55%,#eee 58%,#fff 62%,#ddd 68%,#555 75%,#1a1a1a 100%)}
-.hero-bg::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,rgba(0,0,0,0.5) 0%,rgba(0,0,0,0.15) 15%,transparent 30%,transparent 70%,rgba(0,0,0,0.15) 85%,rgba(0,0,0,0.5) 100%)}
-.hero-bg::after{content:'';position:absolute;top:44%;left:30%;width:40%;height:18%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),rgba(255,255,255,0.25),rgba(255,255,255,0.15),transparent);filter:blur(12px);border-radius:50%}
-.hero-form{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:500px;height:120px;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.08) 20%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.08) 80%,transparent 100%);border-radius:50%;filter:blur(4px)}
-.hero-form::after{content:'';position:absolute;top:-30px;left:10%;width:80%;height:60px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),rgba(255,255,255,0.12),rgba(255,255,255,0.1),transparent);border-radius:50%;filter:blur(8px);transform:rotate(-3deg)}
+.hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:url('hero.png') center/cover no-repeat}
 .hero-title{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);text-align:center;z-index:2}
 .hero-title h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:300;letter-spacing:.2em;color:rgba(255,255,255,0.85)}
 .hero-title p{font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:.15em;margin-top:8px}
@@ -149,7 +145,6 @@ var pagesData={
       return topNav('home')
         +'<div class="hero">'
         +'<div class="hero-bg"></div>'
-        +'<div class="hero-form"></div>'
         +'<div class="hero-title"><h1>AOKI SHINYA</h1><p>Sculpture &amp; Installation</p></div>'
         +'</div>';
     }
