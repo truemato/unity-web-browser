@@ -316,8 +316,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a3b25ad1cb19564db7047a92c8840d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonitorDisplay
-  beforeTexture: {fileID: 2800000, guid: 0d41746100e00024cb686390328f5f5a, type: 3}
-  afterTexture: {fileID: 2800000, guid: 4c9d5f1b7861b40408ed5cbad6ddf946, type: 3}
+  beforeTexture: {fileID: 2800000, guid: c21283eec6d895c4f9f6f4fe3a65f5aa, type: 3}
+  afterTexture: {fileID: 2800000, guid: a8b0cdaa47038204e99e0eee9aa48f85, type: 3}
 --- !u!1 &191374356
 GameObject:
   m_ObjectHideFlags: 0
@@ -2455,8 +2455,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a3b25ad1cb19564db7047a92c8840d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonitorDisplay
-  beforeTexture: {fileID: 2800000, guid: aa28be0491feeca4191dea3b5bd86949, type: 3}
-  afterTexture: {fileID: 2800000, guid: 5f71f3e5df0b5f446b340d6e94aa929d, type: 3}
+  beforeTexture: {fileID: 2800000, guid: 6648fba39c3d4c64aa5a0eac262962fc, type: 3}
+  afterTexture: {fileID: 2800000, guid: a3daeceb637518741b3cec503edc8df5, type: 3}
 --- !u!114 &1375737371
 MonoBehaviour:
   m_ObjectHideFlags: 0

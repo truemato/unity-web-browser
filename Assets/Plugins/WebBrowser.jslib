@@ -5,6 +5,7 @@ var WebBrowserLib = {
     iframes: {},
     container: null,
     canvas: null,
+    pageArrivedQueue: [],
 
     init: function () {
       if (WebBrowserState.initialized) return;
@@ -24,15 +25,8 @@ var WebBrowserLib = {
       WebBrowserState.container = container;
 
       // Keep Unity running even when iframe or page steals focus.
-      // Unity WebGL stops requestAnimationFrame when canvas loses focus.
-      // This fallback timer forces Unity to keep ticking.
       var keepAliveInterval = setInterval(function () {
         try {
-          // Trigger a minimal frame if Unity is idle
-          if (window.unityInstance && typeof window.unityInstance.SendMessage === 'function') {
-            // Just poke Unity to keep it alive - no-op message
-          }
-          // Force canvas to stay in animation loop
           if (canvas && canvas.dispatchEvent) {
             canvas.dispatchEvent(new Event('focus', { bubbles: false }));
           }
@@ -46,14 +40,12 @@ var WebBrowserLib = {
         }
       });
 
-      // postMessage listener for page arrival
+      // postMessage listener — push to queue, C# polls via CheckPageArrived
       window.addEventListener('message', function (e) {
         if (e.data && e.data.type === 'PAGE_ARRIVED') {
           var panelId = e.data.panelId || 0;
-          console.log('[WebBrowser] PAGE_ARRIVED panelId=' + panelId);
-          if (window.unityInstance) {
-            window.unityInstance.SendMessage('LevelManager', 'OnPageArrived', panelId.toString());
-          }
+          console.log('[WebBrowser] PAGE_ARRIVED panelId=' + panelId + ' (queued)');
+          WebBrowserState.pageArrivedQueue.push(panelId);
         }
       });
     }
@@ -62,6 +54,14 @@ var WebBrowserLib = {
   InitBrowser__deps: ['$WebBrowserState'],
   InitBrowser: function () {
     WebBrowserState.init();
+  },
+
+  CheckPageArrived__deps: ['$WebBrowserState'],
+  CheckPageArrived: function () {
+    if (WebBrowserState.pageArrivedQueue.length > 0) {
+      return WebBrowserState.pageArrivedQueue.shift();
+    }
+    return -1;
   },
 
   CreateIframe__deps: ['$WebBrowserState'],

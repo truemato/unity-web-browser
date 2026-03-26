@@ -16,7 +16,7 @@ public class LevelManager : MonoBehaviour
     public MonitorDisplay[] monitorDisplays;
 
     [Header("Delay before rotation (seconds)")]
-    public float delayBeforeRotation = 3f;
+    public float delayBeforeRotation = 1.5f;
 
     private bool _m0Cleared = false;
 
@@ -30,10 +30,14 @@ public class LevelManager : MonoBehaviour
     private AudioSource _sfxSource;
     private AudioSource _ambientSource;
     private bool _leftM0 = false;
+    private bool _rotating = false;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void InitBrowser();
+
+    [DllImport("__Internal")]
+    private static extern int CheckPageArrived();
 #endif
 
     void Start()
@@ -54,8 +58,18 @@ public class LevelManager : MonoBehaviour
 
         // Start already zoomed in on first panel (no animation)
         SetZoomImmediate(_currentPanel);
+    }
 
-        // No auto-rotate; wait for M0 clear (PAGE_ARRIVED panelId:0)
+    void Update()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        int arrived = CheckPageArrived();
+        if (arrived >= 0)
+        {
+            Debug.Log($"[LevelManager] Polled PAGE_ARRIVED panelId={arrived}");
+            OnPageArrived(arrived);
+        }
+#endif
     }
 
     private void PlaySFX(AudioClip clip)
@@ -71,6 +85,12 @@ public class LevelManager : MonoBehaviour
             _ambientSource.clip = ambientSE;
             _ambientSource.Play();
         }
+    }
+
+    private void StopAmbient()
+    {
+        if (_ambientSource != null && _ambientSource.isPlaying)
+            _ambientSource.Stop();
     }
 
     private void SetZoomImmediate(int panelIndex)
@@ -133,13 +153,12 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator RotateSequence()
     {
+        _rotating = true;
         DeactivateAllPanels();
         yield return StartCoroutine(TryZoomOutAndWait());
 
-        // Play rotate SE
         PlaySFX(rotateStartSE);
 
-        // Start ambient on first departure from M0
         if (!_leftM0)
         {
             _leftM0 = true;
@@ -153,24 +172,25 @@ public class LevelManager : MonoBehaviour
 
         yield return StartCoroutine(TryZoomInAndWait(_currentPanel));
 
-        // Play zoom-in SE
         PlaySFX(zoomInSE);
 
         ActivatePanel(_currentPanel);
+        _rotating = false;
     }
 
-    public void OnPageArrived(string panelIdStr)
+    private void OnPageArrived(int panelId)
     {
-        int panelId;
-        if (!int.TryParse(panelIdStr, out panelId)) return;
+        Debug.Log($"[LevelManager] OnPageArrived panelId={panelId}, currentPanel={_currentPanel}, m0Cleared={_m0Cleared}, rotating={_rotating}");
         if (panelId != _currentPanel) return;
-        if (roomManager == null || roomManager.IsRotating) return;
+        if (roomManager == null || _rotating) return;
 
-        // Block all rotation until M0 is cleared
         if (!_m0Cleared)
         {
             if (panelId == 0)
+            {
                 _m0Cleared = true;
+                Debug.Log("[LevelManager] M0 cleared! Rotation unlocked.");
+            }
             else
                 return;
         }
@@ -178,7 +198,18 @@ public class LevelManager : MonoBehaviour
         if (monitorDisplays != null && panelId < monitorDisplays.Length && monitorDisplays[panelId] != null)
             monitorDisplays[panelId].SetCompleted();
 
+        if (panelId == 1)
+            StopAmbient();
+
         StartCoroutine(DelayedRotation());
+    }
+
+    // Keep for backwards compatibility (SendMessage from old builds)
+    public void OnPageArrived(string panelIdStr)
+    {
+        int panelId;
+        if (int.TryParse(panelIdStr, out panelId))
+            OnPageArrived(panelId);
     }
 
     private IEnumerator DelayedRotation()

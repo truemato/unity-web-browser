@@ -140,7 +140,7 @@ function sidebarLayout(activePage, mainHTML){
 // Page definitions
 var pagesData={
   home:{
-    laser:false,
+    laser:true,
     render:function(){
       return topNav('home')
         +'<div class="hero">'
@@ -291,7 +291,7 @@ function goTo(page){
   if(page==='home'){
     sessionStorage.removeItem('m2Cleared');
     sessionStorage.setItem('m2Seed',String(Date.now()%100000));
-    sessionStorage.removeItem('m2Start');
+    sessionStorage.setItem('m2Start',String(Date.now()+10000));
     rng=mkRng(Number(sessionStorage.getItem('m2Seed'))||12345);
     gameOver=false;cleared=false;sparks=[];flashStart=0;
     puzzleRound=0;
@@ -301,8 +301,11 @@ function goTo(page){
     document.getElementById('retry-btn').style.display='none';
   }
 
-  if(page!=='home'&&!sessionStorage.getItem('m2Start')){
-    sessionStorage.setItem('m2Start',String(Date.now()+10000));
+  if(page!=='home'){
+    unlockBgmCtx();
+    if(!sessionStorage.getItem('m2Start')){
+      sessionStorage.setItem('m2Start',String(Date.now()+10000));
+    }
   }
 
   var delay=pagesData[page].hintDelay;
