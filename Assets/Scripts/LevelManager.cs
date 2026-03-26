@@ -38,6 +38,9 @@ public class LevelManager : MonoBehaviour
 
     [DllImport("__Internal")]
     private static extern int CheckPageArrived();
+
+    [DllImport("__Internal")]
+    private static extern int CheckStopAmbient();
 #endif
 
     void Start()
@@ -69,6 +72,8 @@ public class LevelManager : MonoBehaviour
             Debug.Log($"[LevelManager] Polled PAGE_ARRIVED panelId={arrived}");
             OnPageArrived(arrived);
         }
+        if (CheckStopAmbient() > 0)
+            StopAmbient();
 #endif
     }
 

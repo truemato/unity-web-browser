@@ -6,6 +6,7 @@ var WebBrowserLib = {
     container: null,
     canvas: null,
     pageArrivedQueue: [],
+    stopAmbientQueue: 0,
 
     init: function () {
       if (WebBrowserState.initialized) return;
@@ -47,6 +48,9 @@ var WebBrowserLib = {
           console.log('[WebBrowser] PAGE_ARRIVED panelId=' + panelId + ' (queued)');
           WebBrowserState.pageArrivedQueue.push(panelId);
         }
+        if (e.data && e.data.type === 'STOP_AMBIENT') {
+          WebBrowserState.stopAmbientQueue++;
+        }
       });
     }
   },
@@ -62,6 +66,15 @@ var WebBrowserLib = {
       return WebBrowserState.pageArrivedQueue.shift();
     }
     return -1;
+  },
+
+  CheckStopAmbient__deps: ['$WebBrowserState'],
+  CheckStopAmbient: function () {
+    if (WebBrowserState.stopAmbientQueue > 0) {
+      WebBrowserState.stopAmbientQueue--;
+      return 1;
+    }
+    return 0;
   },
 
   CreateIframe__deps: ['$WebBrowserState'],

@@ -548,7 +548,7 @@ function onPuzzleClear(){
     if(el>0){var ls=getLaserState(el);spawnSparks(ls.pos,ls.dir);}
   }
   resetFBO();
-  setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:2},'*');},4000);
+  setTimeout(function(){window.parent.postMessage({type:'PAGE_ARRIVED',panelId:1},'*');},4000);
 }
 
 // ============================================================
@@ -802,7 +802,7 @@ function startBgm(){
   bgmSource.buffer=bgmBuffer;
   bgmSource.loop=true;
   bgmSource.connect(bgmGain);
-  bgmGain.gain.value=0;
+  bgmGain.gain.value=1;
   bgmSource.start(0);
   bgmPlaying=true;
 }
@@ -833,7 +833,7 @@ function tickBgm(ts){
       // For now, just wait AMBIENT_FADE_DUR then start BGM
     }
     if(ambientFading&&(ts-ambientFadeStart)/1000>=AMBIENT_FADE_DUR){
-      startBgm();bgmFadingIn=true;ambientFading=false;
+      startBgm();ambientFading=false;window.parent.postMessage({type:'STOP_AMBIENT'},'*');
     }
   }
 
