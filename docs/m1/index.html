@@ -296,6 +296,7 @@ function goTo(page){
     gameOver=false;cleared=false;sparks=[];flashStart=0;
     puzzleRound=0;
     resetFBO();
+    stopBgm();ambientFading=false;bgmFadingIn=false;
     document.getElementById('gameover').style.display='none';
     document.getElementById('retry-btn').style.display='none';
   }
@@ -768,10 +769,98 @@ function tick(now){
   }
 
   updateSparks(now||performance.now());
+  tickBgm(now||performance.now());
   requestAnimationFrame(tick);
 }
 
 // ============================================================
+// ============================================================
+// BGM — stage2.mp3 with ambient fade logic
+// ============================================================
+var bgmAudioCtx,bgmGain,bgmBuffer=null,bgmSource=null,bgmPlaying=false;
+var bgmStartDelay=5; // seconds after m2Start elapsed>0 to start fade-out ambient
+var ambientFading=false,ambientFadeStart=0;
+var AMBIENT_FADE_DUR=2; // seconds to fade out ambient before BGM
+
+function initBgmCtx(){
+  if(bgmAudioCtx)return;
+  bgmAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  bgmGain=bgmAudioCtx.createGain();bgmGain.gain.value=1;
+  bgmGain.connect(bgmAudioCtx.destination);
+  fetch('../stage2.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
+    return bgmAudioCtx.decodeAudioData(buf);
+  }).then(function(decoded){bgmBuffer=decoded;}).catch(function(){});
+}
+
+function startBgm(){
+  if(bgmPlaying||!bgmBuffer||!bgmAudioCtx)return;
+  if(bgmSource){try{bgmSource.stop();}catch(e){}}
+  bgmSource=bgmAudioCtx.createBufferSource();
+  bgmSource.buffer=bgmBuffer;
+  bgmSource.loop=true;
+  bgmSource.connect(bgmGain);
+  bgmGain.gain.value=0;
+  bgmSource.start(0);
+  bgmPlaying=true;
+}
+
+function stopBgm(){
+  if(!bgmPlaying)return;
+  if(bgmSource){try{bgmSource.stop();}catch(e){}}
+  bgmSource=null;bgmPlaying=false;
+}
+
+// Hook into user interaction for AudioContext unlock
+function unlockBgmCtx(){initBgmCtx();if(bgmAudioCtx&&bgmAudioCtx.state==='suspended')bgmAudioCtx.resume();}
+document.addEventListener('click',unlockBgmCtx);
+document.addEventListener('touchstart',unlockBgmCtx);
+
+// BGM tick: called from main tick loop
+var bgmFadingIn=false;
+function tickBgm(ts){
+  var startT=sessionStorage.getItem('m2Start');
+  if(!startT)return;
+  var el=(Date.now()-Number(startT))/1000;
+
+  // After 5 seconds of laser active, start BGM
+  if(el>bgmStartDelay&&!bgmPlaying&&!cleared&&!gameOver){
+    if(!ambientFading){
+      ambientFading=true;ambientFadeStart=ts;
+      // Ambient fade-out would happen here if there was ambient audio
+      // For now, just wait AMBIENT_FADE_DUR then start BGM
+    }
+    if(ambientFading&&(ts-ambientFadeStart)/1000>=AMBIENT_FADE_DUR){
+      startBgm();bgmFadingIn=true;ambientFading=false;
+    }
+  }
+
+  // BGM fade in
+  if(bgmFadingIn&&bgmPlaying&&bgmGain){
+    var vol=bgmGain.gain.value;
+    if(vol<1){bgmGain.gain.value=Math.min(1,vol+0.008);}
+    else{bgmFadingIn=false;}
+  }
+
+  // Stop on game over
+  if(gameOver&&bgmPlaying){
+    // Quick fade out
+    if(bgmGain&&bgmGain.gain.value>0){
+      bgmGain.gain.value=Math.max(0,bgmGain.gain.value-0.02);
+    }else{
+      stopBgm();
+    }
+  }
+
+  // Stop on clear
+  if(cleared&&bgmPlaying){
+    if(bgmGain&&bgmGain.gain.value>0){
+      bgmGain.gain.value=Math.max(0,bgmGain.gain.value-0.015);
+    }else{
+      stopBgm();
+    }
+  }
+}
+
 // Boot
 // ============================================================
 goTo('home');
