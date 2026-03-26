@@ -248,10 +248,12 @@ var pagesData={
         +'<div class="white-cube">'
         +'<div class="puzzle-header">Round <span id="puzzleRound">1</span> / 5</div>'
         +'<div class="puzzle-area">'
-        +'<div style="display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap">'
-        +'<canvas id="puzzleFull" width="160" height="160" style="border:1px solid #333;border-radius:4px;background:#1a1a1a"></canvas>'
-        +'<div style="font-size:24px;color:#555">\u2192</div>'
-        +'<canvas id="puzzleProblem" width="200" height="200" style="border:1px solid #333;border-radius:4px;background:#1a1a1a"></canvas>'
+        +'<div style="display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap">'
+        +'<canvas id="pieceA" width="140" height="160" style="border:1px solid #333;border-radius:4px;background:#1a1a1a"></canvas>'
+        +'<div style="font-size:28px;color:#555;font-weight:300">+</div>'
+        +'<canvas id="pieceB" width="140" height="160" style="border:1px solid #333;border-radius:4px;background:#1a1a1a"></canvas>'
+        +'<div style="font-size:28px;color:#555;font-weight:300">=</div>'
+        +'<div style="font-size:28px;color:#555;font-weight:300">?</div>'
         +'</div>'
         +'<div class="puzzle-choices" id="puzzleChoices"></div>'
         +'</div>'
@@ -325,160 +327,139 @@ function goTo(page){
 var PUZZLE_TOTAL=5;
 var puzzleRound=0;
 
-// Shape definitions: arrays of [x,y,z] voxel coords
-var shapeLibrary=[
-  // L-shape
-  [[0,0,0],[1,0,0],[2,0,0],[2,1,0]],
-  // T-shape
-  [[0,0,0],[1,0,0],[2,0,0],[1,1,0]],
-  // Stairs
-  [[0,0,0],[1,0,0],[1,1,0],[2,1,0]],
-  // Bridge
-  [[0,0,0],[2,0,0],[0,1,0],[1,1,0],[2,1,0]],
-  // Corner 3D
-  [[0,0,0],[1,0,0],[0,1,0],[0,0,1]],
-  // Tower
-  [[0,0,0],[0,1,0],[0,2,0],[1,0,0]],
-  // Z-shape
-  [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[2,2,0]],
-  // U-shape
-  [[0,0,0],[0,1,0],[0,2,0],[1,0,0],[1,2,0]],
-  // Plus
-  [[1,0,0],[0,1,0],[1,1,0],[2,1,0],[1,2,0]],
-  // 3D L
-  [[0,0,0],[1,0,0],[1,1,0],[1,1,1]],
-  // 3D stairs
-  [[0,0,0],[1,0,0],[1,0,1],[2,0,1]],
-  // Block corner
-  [[0,0,0],[1,0,0],[0,1,0],[0,0,1],[1,0,1]],
-  // Diagonal bridge
-  [[0,0,0],[1,0,0],[1,1,0],[2,1,0],[2,1,1]],
-  // S shape 3D
-  [[0,0,0],[0,1,0],[1,1,0],[1,2,0],[1,2,1]]
+// ============================================================
+// 3D Face-based Solid Renderer
+// ============================================================
+function iso(x,y,z,s){return{x:(x-z)*0.866*s,y:((x+z)*0.5-y)*s};}
+
+function renderSolid(ctx,verts,faces,fillColor,strokeColor,scale,ox,oy){
+  var proj=[];
+  for(var i=0;i<verts.length;i++){var p=iso(verts[i][0],verts[i][1],verts[i][2],scale);proj.push({x:p.x+ox,y:p.y+oy});}
+  var fd=[];
+  for(var i=0;i<faces.length;i++){
+    var f=faces[i];if(f.length<3)continue;
+    var a=proj[f[0]],b=proj[f[1]],c=proj[f[2]];
+    var cross=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+    if(cross<=0)continue;
+    var d=0;for(var j=0;j<f.length;j++){var v=verts[f[j]];d+=v[0]+v[2]-v[1];}d/=f.length;
+    fd.push({f:f,d:d});
+  }
+  fd.sort(function(a,b){return a.d-b.d;});
+  for(var i=0;i<fd.length;i++){
+    var f=fd[i].f;
+    ctx.beginPath();ctx.moveTo(proj[f[0]].x,proj[f[0]].y);
+    for(var j=1;j<f.length;j++)ctx.lineTo(proj[f[j]].x,proj[f[j]].y);
+    ctx.closePath();
+    ctx.fillStyle=fillColor;ctx.fill();
+    ctx.strokeStyle=strokeColor;ctx.lineWidth=1.5;ctx.stroke();
+  }
+}
+
+function centerOffset(verts,scale,cw,ch){
+  var mn={x:1e9,y:1e9},mx={x:-1e9,y:-1e9};
+  for(var i=0;i<verts.length;i++){var p=iso(verts[i][0],verts[i][1],verts[i][2],scale);if(p.x<mn.x)mn.x=p.x;if(p.x>mx.x)mx.x=p.x;if(p.y<mn.y)mn.y=p.y;if(p.y>mx.y)mx.y=p.y;}
+  return{x:cw/2-(mn.x+mx.x)/2,y:ch/2-(mn.y+mx.y)/2};
+}
+
+function drawSolidOnCanvas(cv,verts,faces,fill,stroke,scale){
+  var ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  var o=centerOffset(verts,scale,cv.width,cv.height);
+  renderSolid(ctx,verts,faces,fill,stroke,scale,o.x,o.y);
+}
+
+// ============================================================
+// Shape Generators
+// ============================================================
+function genPyramid(n,r,h){
+  var v=[];
+  for(var i=0;i<n;i++){var a=Math.PI*2*i/n-Math.PI/2;v.push([Math.cos(a)*r,0,Math.sin(a)*r]);}
+  v.push([0,h,0]);
+  var f=[];
+  var base=[];for(var i=n-1;i>=0;i--)base.push(i);f.push(base);
+  for(var i=0;i<n;i++)f.push([i,(i+1)%n,n]);
+  return{v:v,f:f};
+}
+
+function genFrustum(n,rB,rT,hB,hT){
+  var v=[];
+  for(var i=0;i<n;i++){var a=Math.PI*2*i/n-Math.PI/2;v.push([Math.cos(a)*rB,hB,Math.sin(a)*rB]);}
+  for(var i=0;i<n;i++){var a=Math.PI*2*i/n-Math.PI/2;v.push([Math.cos(a)*rT,hT,Math.sin(a)*rT]);}
+  var f=[];
+  var base=[];for(var i=n-1;i>=0;i--)base.push(i);f.push(base);
+  var top=[];for(var i=0;i<n;i++)top.push(n+i);f.push(top);
+  for(var i=0;i<n;i++){var j=(i+1)%n;f.push([i,j,n+j,n+i]);}
+  return{v:v,f:f};
+}
+
+function genPrism(n,r,h){return genFrustum(n,r,r,0,h);}
+
+function genSmallPyramid(n,rB,hB,hT){
+  var v=[];
+  for(var i=0;i<n;i++){var a=Math.PI*2*i/n-Math.PI/2;v.push([Math.cos(a)*rB,hB,Math.sin(a)*rB]);}
+  v.push([0,hT,0]);
+  var f=[];
+  var base=[];for(var i=n-1;i>=0;i--)base.push(i);f.push(base);
+  for(var i=0;i<n;i++)f.push([i,(i+1)%n,n]);
+  return{v:v,f:f};
+}
+
+// ============================================================
+// 5 Hand-crafted Puzzles
+// ============================================================
+// Each: {pieceA, pieceB, correct, wrong1, wrong2}
+// pieceA/B = {v,f} shown as problem, correct/wrong = {v,f} for choices
+
+var puzzleBank=[
+  // P1: Square pyramid cut at 50% height
+  (function(){
+    var pA=genFrustum(4,1,0.5,0,1);
+    var pB=genSmallPyramid(4,0.5,1,2);
+    var cor=genPyramid(4,1,2);
+    var w1=genPyramid(3,1,2);
+    var w2=genPyramid(8,1,2);
+    return{pieceA:pA,pieceB:pB,correct:cor,wrong1:w1,wrong2:w2};
+  })(),
+  // P2: Triangular prism cut vertically into two wedges
+  (function(){
+    var pA={v:[[0,0,-1],[1,0,0],[0,0,1],[0,1.5,-1],[1,1.5,0],[0,1.5,1]],
+      f:[[0,2,1],[3,4,5],[0,1,4,3],[1,2,5,4],[2,0,3,5]]};
+    var pB={v:[[-1,0,0],[0,0,-1],[0,0,1],[-1,1.5,0],[0,1.5,-1],[0,1.5,1]],
+      f:[[0,1,2],[3,5,4],[0,1,4,3],[1,2,5,4],[2,0,3,5]]};
+    var cor=genPrism(3,1,1.5);
+    var w1=genPrism(4,0.8,1.5);
+    var w2=genPrism(6,0.8,1.5);
+    return{pieceA:pA,pieceB:pB,correct:cor,wrong1:w1,wrong2:w2};
+  })(),
+  // P3: Hex pyramid cut at 60% height
+  (function(){
+    var pA=genFrustum(6,1,0.4,0,1.2);
+    var pB=genSmallPyramid(6,0.4,1.2,2);
+    var cor=genPyramid(6,1,2);
+    var w1=genPyramid(4,1,2);
+    var w2=genPyramid(3,1.2,2);
+    return{pieceA:pA,pieceB:pB,correct:cor,wrong1:w1,wrong2:w2};
+  })(),
+  // P4: Cylinder (octagon) cut at 40% height
+  (function(){
+    var pA=genFrustum(8,0.9,0.9,0,0.8);
+    var pB=genFrustum(8,0.9,0.9,0.8,2);
+    var cor=genPrism(8,0.9,2);
+    var w1=genPyramid(8,0.9,2);
+    var w2=genFrustum(8,1.1,0.5,0,2);
+    return{pieceA:pA,pieceB:pB,correct:cor,wrong1:w1,wrong2:w2};
+  })(),
+  // P5: Cube cut diagonally into two wedges
+  (function(){
+    var pA={v:[[-1,0,-1],[1,0,-1],[1,0,1],[-1,0,1],[-1,1.5,-1],[1,1.5,-1]],
+      f:[[0,3,2,1],[0,1,5,4],[4,5,1,0],[0,4,3],[3,4,5,2],[1,2,5]]};
+    var pB={v:[[-1,0,1],[1,0,1],[-1,1.5,-1],[1,1.5,-1],[-1,1.5,1],[1,1.5,1]],
+      f:[[0,1,3,2],[2,3,5,4],[4,5,1,0],[0,2,4],[1,5,3]]};
+    var cor=genPrism(4,1,1.5);
+    var w1=genPrism(4,1.3,1);
+    var w2=genPrism(6,0.8,1.5);
+    return{pieceA:pA,pieceB:pB,correct:cor,wrong1:w1,wrong2:w2};
+  })()
 ];
-
-function cellKey(c){return c[0]+','+c[1]+','+c[2];}
-function cellsEqual(a,b){
-  if(a.length!==b.length)return false;
-  var sa=a.map(cellKey).sort().join('|');
-  var sb=b.map(cellKey).sort().join('|');
-  return sa===sb;
-}
-
-function splitShape(cells,puzzleRng){
-  // Create a random cut plane
-  var maxX=0,maxY=0,maxZ=0;
-  for(var i=0;i<cells.length;i++){
-    if(cells[i][0]>maxX)maxX=cells[i][0];
-    if(cells[i][1]>maxY)maxY=cells[i][1];
-    if(cells[i][2]>maxZ)maxZ=cells[i][2];
-  }
-  // Try multiple random cuts until we get a valid split
-  for(var attempt=0;attempt<50;attempt++){
-    var axis=Math.floor(puzzleRng()*3);
-    var maxVal=[maxX,maxY,maxZ][axis];
-    var cutAt=puzzleRng()*(maxVal+1);
-    var pieceA=[],pieceB=[];
-    for(var i=0;i<cells.length;i++){
-      if(cells[i][axis]<cutAt) pieceA.push(cells[i].slice());
-      else pieceB.push(cells[i].slice());
-    }
-    if(pieceA.length>=1&&pieceB.length>=1) return {a:pieceA,b:pieceB};
-  }
-  // Fallback: split in half
-  var half=Math.floor(cells.length/2);
-  return {a:cells.slice(0,half),b:cells.slice(half)};
-}
-
-function getWrongPieceFromOtherShape(correctCells,correctShapeIdx,puzzleRng){
-  // Pick a different shape, split it, return one piece as a wrong answer
-  for(var attempt=0;attempt<20;attempt++){
-    var idx=Math.floor(puzzleRng()*shapeLibrary.length);
-    if(idx===correctShapeIdx) continue;
-    var otherShape=shapeLibrary[idx];
-    var otherSplit=splitShape(otherShape,puzzleRng);
-    var candidate=puzzleRng()<0.5?otherSplit.a:otherSplit.b;
-    if(!cellsEqual(candidate,correctCells)) return candidate;
-  }
-  // Fallback: mirror the correct piece
-  var mirrored=[];
-  for(var i=0;i<correctCells.length;i++){
-    mirrored.push([correctCells[i][0],correctCells[i][1]+2,correctCells[i][2]]);
-  }
-  return mirrored;
-}
-
-// Isometric drawing
-function isoProject(x,y,z,scale){
-  var px=((x-z)*0.866)*scale;
-  var py=((x+z)*0.5-y)*scale;
-  return {x:px,y:py};
-}
-
-function drawVoxel(ctx,x,y,z,scale,ox,oy){
-  var s=scale;
-  // 8 corners of the voxel cube
-  var corners=[
-    [x,y,z],[x+1,y,z],[x+1,y,z+1],[x,y,z+1],
-    [x,y+1,z],[x+1,y+1,z],[x+1,y+1,z+1],[x,y+1,z+1]
-  ];
-  var p=[];
-  for(var i=0;i<8;i++){
-    var ip=isoProject(corners[i][0],corners[i][1],corners[i][2],s);
-    p.push({x:ip.x+ox,y:ip.y+oy});
-  }
-  // Top face (4,5,6,7)
-  ctx.beginPath();
-  ctx.moveTo(p[4].x,p[4].y);ctx.lineTo(p[5].x,p[5].y);
-  ctx.lineTo(p[6].x,p[6].y);ctx.lineTo(p[7].x,p[7].y);ctx.closePath();
-  ctx.fillStyle='rgba(120,120,255,0.35)';ctx.fill();
-  ctx.strokeStyle='rgba(40,40,80,0.7)';ctx.lineWidth=1;ctx.stroke();
-
-  // Left face (0,3,7,4)
-  ctx.beginPath();
-  ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[3].x,p[3].y);
-  ctx.lineTo(p[7].x,p[7].y);ctx.lineTo(p[4].x,p[4].y);ctx.closePath();
-  ctx.fillStyle='rgba(100,100,220,0.4)';ctx.fill();
-  ctx.strokeStyle='rgba(40,40,80,0.7)';ctx.lineWidth=1;ctx.stroke();
-
-  // Right face (1,5,6,2) -> actually front-right (0,1,5,4)
-  ctx.beginPath();
-  ctx.moveTo(p[0].x,p[0].y);ctx.lineTo(p[1].x,p[1].y);
-  ctx.lineTo(p[5].x,p[5].y);ctx.lineTo(p[4].x,p[4].y);ctx.closePath();
-  ctx.fillStyle='rgba(80,80,200,0.45)';ctx.fill();
-  ctx.strokeStyle='rgba(40,40,80,0.7)';ctx.lineWidth=1;ctx.stroke();
-}
-
-function renderShape(canvas,cells,scale){
-  var ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  if(!cells||cells.length===0)return;
-
-  // Sort cells for painter's algorithm: draw back to front
-  var sorted=cells.slice().sort(function(a,b){
-    var sa=a[0]+a[2]-a[1];
-    var sb=b[0]+b[2]-b[1];
-    return sa-sb;
-  });
-
-  // Center offset
-  var minPx=Infinity,maxPx=-Infinity,minPy=Infinity,maxPy=-Infinity;
-  for(var i=0;i<cells.length;i++){
-    var c=cells[i];
-    // Check all 8 corners
-    for(var dx=0;dx<=1;dx++)for(var dy=0;dy<=1;dy++)for(var dz=0;dz<=1;dz++){
-      var ip=isoProject(c[0]+dx,c[1]+dy,c[2]+dz,scale);
-      if(ip.x<minPx)minPx=ip.x;if(ip.x>maxPx)maxPx=ip.x;
-      if(ip.y<minPy)minPy=ip.y;if(ip.y>maxPy)maxPy=ip.y;
-    }
-  }
-  var ox=canvas.width/2-(minPx+maxPx)/2;
-  var oy=canvas.height/2-(minPy+maxPy)/2;
-
-  for(var i=0;i<sorted.length;i++){
-    drawVoxel(ctx,sorted[i][0],sorted[i][1],sorted[i][2],scale,ox,oy);
-  }
-}
 
 var currentPuzzleCorrectIdx=-1;
 
@@ -491,59 +472,39 @@ function showPuzzleRound(){
   var roundEl=document.getElementById('puzzleRound');
   var choicesEl=document.getElementById('puzzleChoices');
   var statusEl=document.getElementById('puzzleStatus');
-  var problemCv=document.getElementById('puzzleProblem');
-  var fullCv=document.getElementById('puzzleFull');
-  if(!roundEl||!choicesEl||!problemCv||!fullCv)return;
+  var cvA=document.getElementById('pieceA');
+  var cvB=document.getElementById('pieceB');
+  if(!roundEl||!choicesEl||!cvA||!cvB)return;
 
   roundEl.textContent=String(puzzleRound+1);
-  statusEl.textContent='';
+  if(statusEl)statusEl.textContent='';
   choicesEl.innerHTML='';
 
-  // Pick a random shape
+  // Deterministic shuffle of puzzle order per seed
   var puzzleRng=mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*7919);
-  var shapeIdx=Math.floor(puzzleRng()*shapeLibrary.length);
-  var shape=shapeLibrary[shapeIdx];
+  var order=[];for(var i=0;i<puzzleBank.length;i++)order.push(i);
+  for(var i=order.length-1;i>0;i--){var j=Math.floor(puzzleRng()*(i+1));var t=order[i];order[i]=order[j];order[j]=t;}
+  var pz=puzzleBank[order[puzzleRound%puzzleBank.length]];
 
-  // Split into two pieces
-  var split=splitShape(shape,puzzleRng);
+  // Draw pieces
+  drawSolidOnCanvas(cvA,pz.pieceA.v,pz.pieceA.f,'rgba(70,130,230,0.5)','rgba(30,60,120,0.8)',30);
+  drawSolidOnCanvas(cvB,pz.pieceB.v,pz.pieceB.f,'rgba(220,100,70,0.5)','rgba(120,40,20,0.8)',30);
 
-  // Render full shape (reference)
-  renderShape(fullCv,shape,22);
-
-  // Render remaining piece A
-  renderShape(problemCv,split.a,30);
-
-  // Generate choices: 1 correct (piece B) + 2 wrong from OTHER shapes
-  var correct=split.b;
-  var wrong1=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*13+37));
-  var wrong2=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*31+71));
-
-  // Ensure all 3 choices are distinct
-  if(cellsEqual(wrong1,wrong2)){
-    wrong2=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*97+13));
-  }
-  if(cellsEqual(wrong1,correct)){
-    wrong1=getWrongPieceFromOtherShape(correct,shapeIdx,mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*53+7));
-  }
-
+  // Build choices
   var choices=[
-    {cells:correct,isCorrect:true},
-    {cells:wrong1,isCorrect:false},
-    {cells:wrong2,isCorrect:false}
+    {shape:pz.correct,isCorrect:true},
+    {shape:pz.wrong1,isCorrect:false},
+    {shape:pz.wrong2,isCorrect:false}
   ];
-
-  // Shuffle
-  for(var i=choices.length-1;i>0;i--){
-    var j=Math.floor(puzzleRng()*(i+1));
-    var tmp=choices[i];choices[i]=choices[j];choices[j]=tmp;
-  }
+  // Shuffle choices
+  for(var i=choices.length-1;i>0;i--){var j=Math.floor(puzzleRng()*(i+1));var t=choices[i];choices[i]=choices[j];choices[j]=t;}
 
   for(var i=0;i<choices.length;i++){
     var cv=document.createElement('canvas');
     cv.width=140;cv.height=140;
     cv.className='puzzle-choice';
     cv.style.background='#1a1a1a';
-    renderShape(cv,choices[i].cells,22);
+    drawSolidOnCanvas(cv,choices[i].shape.v,choices[i].shape.f,'rgba(120,120,255,0.45)','rgba(40,40,100,0.8)',24);
     (function(choice,cvEl){
       cvEl.addEventListener('click',function(){
         if(cleared||gameOver)return;
