@@ -483,11 +483,8 @@ function showPuzzleRound(){
   if(statusEl)statusEl.textContent='';
   choicesEl.innerHTML='';
 
-  // Deterministic shuffle of puzzle order per seed
   var puzzleRng=mkRng((Number(sessionStorage.getItem('m2Seed'))||12345)+puzzleRound*7919);
-  var order=[];for(var i=0;i<puzzleBank.length;i++)order.push(i);
-  for(var i=order.length-1;i>0;i--){var j=Math.floor(puzzleRng()*(i+1));var t=order[i];order[i]=order[j];order[j]=t;}
-  var pz=puzzleBank[order[puzzleRound%puzzleBank.length]];
+  var pz=puzzleBank[puzzleRound%puzzleBank.length];
 
   // Draw pieces
   drawSolidOnCanvas(cvA,pz.pieceA.v,pz.pieceA.f,'rgba(70,130,230,0.5)','rgba(30,60,120,0.8)',30);
