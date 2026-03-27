@@ -295,8 +295,8 @@ function goTo(page){
       pagesData.home.laser=false;
       pagesData.home.hintDelay=0;
       sessionStorage.removeItem('m2Cleared');
+      sessionStorage.removeItem('m2Start');
       sessionStorage.setItem('m2Seed',String(Date.now()%100000));
-      sessionStorage.setItem('m2Start',String(Date.now()+3000));
       rng=mkRng(Number(sessionStorage.getItem('m2Seed'))||12345);
       gameOver=false;cleared=false;sparks=[];flashStart=0;
       puzzleRound=0;
@@ -312,6 +312,9 @@ function goTo(page){
 
   if(page!=='home'){
     unlockBgmCtx();
+    if(!sessionStorage.getItem('m2Start')){
+      sessionStorage.setItem('m2Start',String(Date.now()+3000));
+    }
   }
 
   var delay=pagesData[page].hintDelay;
