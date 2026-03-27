@@ -150,7 +150,7 @@ var pagesData={
     }
   },
   profile:{
-    laser:true,hintDelay:4000,
+    laser:true,
     render:function(){
       return sidebarLayout('profile',
         '<div class="profile-header">'
@@ -174,7 +174,7 @@ var pagesData={
     }
   },
   biography:{
-    laser:true,hintDelay:4000,
+    laser:true,
     render:function(){
       return sidebarLayout('biography',
         '<header class="page-header"><p class="eyebrow">Biography</p><h1>Chronology</h1></header>'
@@ -210,7 +210,7 @@ var pagesData={
     }
   },
   portfolio:{
-    laser:true,hintDelay:4000,
+    laser:true,
     render:function(){
       var works=[
         {id:'w1',title:'Liminal Form',year:'2024',grad:'linear-gradient(135deg,#c8bfb8,#a8a0a8,#d0c8d0)'},
@@ -236,7 +236,7 @@ var pagesData={
     }
   },
   work:{
-    laser:true,hintDelay:4000,
+    laser:true,
     render:function(){
       return sidebarLayout('portfolio',
         '<div class="work-page">'
@@ -261,7 +261,7 @@ var pagesData={
     }
   },
   contact:{
-    laser:true,hintDelay:4000,
+    laser:true,
     render:function(){
       return sidebarLayout('contact',
         '<header class="page-header"><p class="eyebrow">\u304a\u554f\u3044\u5408\u308f\u305b</p><h1>\u3054\u9023\u7d61</h1></header>'
@@ -294,7 +294,6 @@ function goTo(page){
     var laserActive=booted&&startT&&(Date.now()-Number(startT))>0&&!gameOver;
     if(!laserActive){
       pagesData.home.laser=false;
-      pagesData.home.hintDelay=0;
       sessionStorage.removeItem('m2Cleared');
       sessionStorage.removeItem('m2Start');
       sessionStorage.setItem('m2Seed',String(Date.now()%100000));
@@ -307,7 +306,6 @@ function goTo(page){
       document.getElementById('retry-btn').style.display='none';
     }else{
       pagesData.home.laser=true;
-      pagesData.home.hintDelay=4000;
     }
   }
 
@@ -318,14 +316,7 @@ function goTo(page){
     }
   }
 
-  var delay=pagesData[page].hintDelay;
-  if(delay){
-    hintTimer=setTimeout(function(){
-      var h=document.getElementById('hint');
-      h.style.display='block';
-      requestAnimationFrame(function(){h.classList.add('show');});
-    },delay);
-  }
+
 
   if(pagesData[page].init) pagesData[page].init();
 }
@@ -669,7 +660,11 @@ function triggerFlash(){
   flashStart=performance.now();
   gameOver=true;
   document.getElementById('gameover').style.display='block';
-  setTimeout(function(){document.getElementById('retry-btn').style.display='block';},1000);
+  setTimeout(function(){
+    document.getElementById('retry-btn').style.display='block';
+    var h=document.getElementById('hint');h.style.display='block';
+    requestAnimationFrame(function(){h.classList.add('show');});
+  },1000);
 }
 
 function checkHit(laserDir,laserPos){
