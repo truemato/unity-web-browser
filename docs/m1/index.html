@@ -291,10 +291,9 @@ function goTo(page){
   if(page==='home'){
     sessionStorage.removeItem('m2Cleared');
     sessionStorage.setItem('m2Seed',String(Date.now()%100000));
-    // m2Start reset only if stage is already active (retry mid-stage)
-    if(sessionStorage.getItem('m2Start')){
-      sessionStorage.setItem('m2Start',String(Date.now()+10000));
-    }
+    // m2Start: clear first, then reset only if stage is already active (retry)
+    sessionStorage.removeItem('m2Start');
+    if(stageActive){ sessionStorage.setItem('m2Start',String(Date.now()+1000)); }
     rng=mkRng(Number(sessionStorage.getItem('m2Seed'))||12345);
     gameOver=false;cleared=false;sparks=[];flashStart=0;
     puzzleRound=0;
@@ -865,11 +864,11 @@ function tickBgm(ts){
 }
 
 // STAGE_START: sent by Unity (NotifyStageStart) after zoom-in to this panel
+var stageActive=false;
 window.addEventListener('message',function(e){
   if(e.data&&e.data.type==='STAGE_START'){
-    if(!sessionStorage.getItem('m2Start')){
-      sessionStorage.setItem('m2Start',String(Date.now()+1000));
-    }
+    stageActive=true;
+    sessionStorage.setItem('m2Start',String(Date.now()+1000));
     unlockBgmCtx();
   }
 });
