@@ -818,6 +818,8 @@ document.addEventListener('touchstart',unlockBgmCtx);
 // BGM tick: called from main tick loop
 var bgmFadingIn=false;
 function tickBgm(ts){
+  var active=pagesData[currentPage]&&pagesData[currentPage].laser;
+  if(!active)return;
   var startT=sessionStorage.getItem('m2Start');
   if(!startT)return;
   var el=(Date.now()-Number(startT))/1000;
