@@ -140,7 +140,7 @@ function sidebarLayout(activePage, mainHTML){
 // Page definitions
 var pagesData={
   home:{
-    laser:true,hintDelay:4000,
+    laser:false,
     render:function(){
       return topNav('home')
         +'<div class="hero">'
@@ -290,8 +290,10 @@ function goTo(page){
 
   if(page==='home'){
     var startT=sessionStorage.getItem('m2Start');
-    var laserActive=startT&&(Date.now()-Number(startT))>0;
-    if(gameOver||!laserActive){
+    var laserActive=startT&&(Date.now()-Number(startT))>0&&!gameOver;
+    if(!laserActive){
+      pagesData.home.laser=false;
+      pagesData.home.hintDelay=0;
       sessionStorage.removeItem('m2Cleared');
       sessionStorage.setItem('m2Seed',String(Date.now()%100000));
       sessionStorage.setItem('m2Start',String(Date.now()+3000));
@@ -302,6 +304,9 @@ function goTo(page){
       stopBgm();ambientFading=false;bgmFadingIn=false;
       document.getElementById('gameover').style.display='none';
       document.getElementById('retry-btn').style.display='none';
+    }else{
+      pagesData.home.laser=true;
+      pagesData.home.hintDelay=4000;
     }
   }
 
