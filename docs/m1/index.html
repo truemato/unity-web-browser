@@ -291,7 +291,7 @@ function goTo(page){
   if(page==='home'){
     sessionStorage.removeItem('m2Cleared');
     sessionStorage.setItem('m2Seed',String(Date.now()%100000));
-    sessionStorage.setItem('m2Start',String(Date.now()+1000));
+    sessionStorage.setItem('m2Start',String(Date.now()+3000));
     rng=mkRng(Number(sessionStorage.getItem('m2Seed'))||12345);
     gameOver=false;cleared=false;sparks=[];flashStart=0;
     puzzleRound=0;
@@ -868,7 +868,7 @@ var stageActive=false;
 window.addEventListener('message',function(e){
   if(e.data&&e.data.type==='STAGE_START'){
     stageActive=true;
-    sessionStorage.setItem('m2Start',String(Date.now()+1000));
+    sessionStorage.setItem('m2Start',String(Date.now()+3000));
     unlockBgmCtx();
   }
 });
