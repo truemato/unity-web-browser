@@ -100,11 +100,15 @@ var WebBrowserLib = {
       var iframe = WebBrowserState.iframes[panelId];
       if (!iframe) return;
       if (visible) {
+        var wasHidden = iframe.style.display === 'none';
         iframe.style.display = 'block';
         iframe.style.left = (left * 100) + '%';
         iframe.style.top = (top * 100) + '%';
         iframe.style.width = (width * 100) + '%';
         iframe.style.height = (height * 100) + '%';
+        if (wasHidden) {
+          try { iframe.contentWindow.postMessage({type:'STAGE_START'}, '*'); } catch(e) {}
+        }
       } else {
         iframe.style.display = 'none';
       }

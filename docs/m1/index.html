@@ -291,7 +291,10 @@ function goTo(page){
   if(page==='home'){
     sessionStorage.removeItem('m2Cleared');
     sessionStorage.setItem('m2Seed',String(Date.now()%100000));
-    sessionStorage.setItem('m2Start',String(Date.now()+10000));
+    // m2Start reset only if stage is already active (retry mid-stage)
+    if(sessionStorage.getItem('m2Start')){
+      sessionStorage.setItem('m2Start',String(Date.now()+10000));
+    }
     rng=mkRng(Number(sessionStorage.getItem('m2Seed'))||12345);
     gameOver=false;cleared=false;sparks=[];flashStart=0;
     puzzleRound=0;
@@ -303,9 +306,6 @@ function goTo(page){
 
   if(page!=='home'){
     unlockBgmCtx();
-    if(!sessionStorage.getItem('m2Start')){
-      sessionStorage.setItem('m2Start',String(Date.now()+10000));
-    }
   }
 
   var delay=pagesData[page].hintDelay;
@@ -863,6 +863,14 @@ function tickBgm(ts){
     }
   }
 }
+
+// STAGE_START: sent by Unity (WebBrowser.jslib) when this iframe becomes visible
+window.addEventListener('message',function(e){
+  if(e.data&&e.data.type==='STAGE_START'){
+    sessionStorage.setItem('m2Start',String(Date.now()+10000));
+    unlockBgmCtx();
+  }
+});
 
 // Boot
 // ============================================================
