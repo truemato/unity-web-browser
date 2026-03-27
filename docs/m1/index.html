@@ -154,7 +154,7 @@ var pagesData={
     render:function(){
       return sidebarLayout('profile',
         '<div class="profile-header">'
-        +'<div class="profile-photo"></div>'
+        +'<div class="profile-photo" style="background:url(\'profile.jpg\') center/cover no-repeat"></div>'
         +'<div class="profile-info">'
         +'<h1>\u9752\u6728\u771f\u4e5f</h1>'
         +'<h2>Aoki Shinya / \u5f6b\u523b\u30fb\u30a4\u30f3\u30b9\u30bf\u30ec\u30fc\u30b7\u30e7\u30f3</h2>'
@@ -166,9 +166,9 @@ var pagesData={
         +'<div class="history-section">'
         +'<h3>Exhibition History</h3>'
         +'<div class="history-grid">'
-        +'<div><div class="history-img" style="background:linear-gradient(145deg,#c8c0b8,#a8a0a0,#d0c8c0)"></div><div class="history-caption">\u300cGlass Sentence for an Empty Room\u300d Passage 17 2024</div></div>'
-        +'<div><div class="history-img" style="background:linear-gradient(145deg,#b0b8c0,#909898,#c0c8c0)"></div><div class="history-caption">\u300cPerimeter of Condensed Air\u300d Orbit House 2022</div></div>'
-        +'<div><div class="history-img" style="background:linear-gradient(145deg,#d0d0c8,#b8b0a8,#c8c8c0)"></div><div class="history-caption">\u300cIndex for a Transparent Wall\u300d Feldweg Raum 2020</div></div>'
+        +'<div onclick="goTo(\'work\');return false" style="cursor:pointer"><div class="history-img" style="background:url(\'ex1.jpg\') center/cover no-repeat"></div><div class="history-caption">\u300cGlass Sentence for an Empty Room\u300d Passage 17 2024</div></div>'
+        +'<div onclick="goTo(\'work\');return false" style="cursor:pointer"><div class="history-img" style="background:url(\'ex2.jpg\') center/cover no-repeat"></div><div class="history-caption">\u300cPerimeter of Condensed Air\u300d Orbit House 2022</div></div>'
+        +'<div onclick="goTo(\'work\');return false" style="cursor:pointer"><div class="history-img" style="background:url(\'ex3.jpg\') center/cover no-repeat"></div><div class="history-caption">\u300cIndex for a Transparent Wall\u300d Feldweg Raum 2020</div></div>'
         +'</div></div>'
       );
     }
