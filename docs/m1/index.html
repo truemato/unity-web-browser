@@ -781,9 +781,9 @@ function tick(now){
 // BGM — stage2.mp3 with ambient fade logic
 // ============================================================
 var bgmAudioCtx,bgmGain,bgmBuffer=null,bgmSource=null,bgmPlaying=false;
-var bgmStartDelay=5; // seconds after m2Start elapsed>0 to start fade-out ambient
+var bgmStartDelay=0; // start BGM immediately when laser starts
 var ambientFading=false,ambientFadeStart=0;
-var AMBIENT_FADE_DUR=2; // seconds to fade out ambient before BGM
+var AMBIENT_FADE_DUR=0; // no delay before BGM
 
 function initBgmCtx(){
   if(bgmAudioCtx)return;
@@ -864,10 +864,12 @@ function tickBgm(ts){
   }
 }
 
-// STAGE_START: sent by Unity (WebBrowser.jslib) when this iframe becomes visible
+// STAGE_START: sent by Unity (NotifyStageStart) after zoom-in to this panel
 window.addEventListener('message',function(e){
   if(e.data&&e.data.type==='STAGE_START'){
-    sessionStorage.setItem('m2Start',String(Date.now()+10000));
+    if(!sessionStorage.getItem('m2Start')){
+      sessionStorage.setItem('m2Start',String(Date.now()+1000));
+    }
     unlockBgmCtx();
   }
 });

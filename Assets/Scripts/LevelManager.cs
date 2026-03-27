@@ -41,6 +41,9 @@ public class LevelManager : MonoBehaviour
 
     [DllImport("__Internal")]
     private static extern int CheckStopAmbient();
+
+    [DllImport("__Internal")]
+    private static extern void NotifyStageStart(int panelId);
 #endif
 
     void Start()
@@ -180,6 +183,9 @@ public class LevelManager : MonoBehaviour
         PlaySFX(zoomInSE);
 
         ActivatePanel(_currentPanel);
+#if UNITY_WEBGL && !UNITY_EDITOR
+        NotifyStageStart(_currentPanel);
+#endif
         _rotating = false;
     }
 
