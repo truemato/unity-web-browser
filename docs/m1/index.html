@@ -278,6 +278,7 @@ var pagesData={
   }
 };
 
+var booted=false;
 function goTo(page){
   if(!pagesData[page])return;
   if(gameOver&&page!=='home')return;
@@ -290,7 +291,7 @@ function goTo(page){
 
   if(page==='home'){
     var startT=sessionStorage.getItem('m2Start');
-    var laserActive=startT&&(Date.now()-Number(startT))>0&&!gameOver;
+    var laserActive=booted&&startT&&(Date.now()-Number(startT))>0&&!gameOver;
     if(!laserActive){
       pagesData.home.laser=false;
       pagesData.home.hintDelay=0;
@@ -888,5 +889,6 @@ window.addEventListener('message',function(e){
 // Boot
 // ============================================================
 goTo('home');
+booted=true;
 tick();
 </script></body></html>
