@@ -1,39 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KAZUKI Hata | Exhibitions</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel 2</title>
+  <style>
+    body { margin:0; display:flex; align-items:center; justify-content:center; height:100vh; background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%); color:white; font-family:sans-serif; }
+    .container { text-align:center; }
+    h1 { font-size:2.5em; margin-bottom:0.3em; }
+    p { font-size:1.2em; opacity:0.8; margin-bottom:1em; }
+    .btn { display:inline-block; margin:0.3em; padding:14px 28px; background:white; color:#11998e; text-decoration:none; border-radius:8px; font-size:1.1em; border:none; cursor:pointer; font-weight:bold; }
+    .btn:hover { opacity:0.85; }
+    .btn-goal { background:#667eea; color:white; }
+    #counter { font-size:1.5em; margin-top:0.8em; }
+  </style>
 </head>
 <body>
-  <div class="layout">
-    <aside class="sidebar">
-      <h1 class="brand">KAZUKI Hata</h1>
-      <nav class="nav" aria-label="Primary">
-        <a href="index.html" aria-current="page">Exhibitions</a>
-        <a href="biography.html">Biography</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-    </aside>
-    <main class="content">
-      <div class="gallery">
-        <div class="gallery-item">
-          <img src="TY01.png" alt="TY01">
-        </div>
-        <div class="gallery-item">
-          <img src="TY02.png" alt="TY02" style="width:50%">
-        </div>
-        <div class="gallery-item" style="display:flex;justify-content:flex-end">
-          <img src="TY03.png" alt="TY03" style="width:50%">
-        </div>
-      </div>
-    </main>
+  <div class="container">
+    <h1>Panel 2</h1>
+    <p>Third monitor</p>
+    <button class="btn" onclick="count++; document.getElementById('counter').textContent='Clicks: '+count">Click Me!</button>
+    <a class="btn btn-goal" href="goal.html">Go to Goal</a>
+    <div id="counter">Clicks: 0</div>
   </div>
-<script>
-sessionStorage.removeItem('m2Cleared');
-sessionStorage.removeItem('m2Start');
-sessionStorage.removeItem('m2GameOver');
-</script>
+  <script>var count = 0;</script>
 </body>
 </html>
